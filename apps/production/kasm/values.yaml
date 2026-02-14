@@ -1,0 +1,31 @@
+agent:
+  enabled: false
+
+ingress:
+  enabled: false
+  backendProtocol: https
+
+certificate:
+  secretName: "kasm-apps-ingress"
+
+publicAddr: "kasm.apps.6541333.xyz"
+
+proxyService:
+  type: ClusterIP
+
+# If below error occured inside `kasm-db-init-job` pod:
+# -----------------------
+# LINE 3: setting_id UUID DEFAULT uuid_generate_v4() NOT NULL,
+# HINT: No function matches the given name and argument types. You might need to add explicit type casts.
+# -----------------------
+# Run this command inside kasm database:
+# CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+database:
+  standalone: true
+  hostname: "kasm-db.6541333.xyz"
+  port: 5432
+  kasmDbName: "kasm-workspaces"
+  kasmDbUser: "kasm"
+  kasmDbSecret:
+    name: "kasm-db-creds" 
+    key: "password"

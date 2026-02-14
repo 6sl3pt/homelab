@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: kasm-workspaces
+resources:
+  - ../../base/kasm/
+  - ingress.yaml
+
+configMapGenerator:
+  - name: kasm-values
+    files:
+      - values.yaml=values.yaml

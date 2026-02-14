@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kasm
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: kasm.apps.6541333.xyz
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: cilium
+  rules:
+    - host: kasm.apps.6541333.xyz
+      http:
+        paths:
+          - backend:
+              service:
+                name: kasm-proxy-default
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - kasm.apps.6541333.xyz
+      secretName: kasm-apps-ingress
