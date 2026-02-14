@@ -1,0 +1,83 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: kasm-db-production-cnpg-v1
+spec:
+  description: Postgres cluster for the Kasm workspace
+  imageName: quay.io/enterprisedb/postgresql:17.7
+  instances: 3
+
+  monitoring:
+    enablePodMonitor: true
+
+  inheritedMetadata:
+    labels:
+      app: kasm-database
+      policy-type: "database"
+
+  storage:
+    size: 5Gi
+
+  bootstrap:
+    # initdb:
+    recovery:
+      source: cluster-backup
+      database: kasm-workspaces
+      owner: kasm
+      secret:
+        name: kasm-db-creds
+      managed:
+        extensions:
+          - name: "uuid-ossp"
+
+  externalClusters:
+    - name: cluster-backup
+      barmanObjectStore:
+        destinationPath: s3://homelab-kasm
+        endpointURL: https://d322d8d4cf96aba84430eba5cc9ea9c9.r2.cloudflarestorage.com
+        serverName: kasm-db-production-cnpg-v1
+        s3Credentials:
+          accessKeyId:
+            name: r2-creds
+            key: kasm-r2-access-key-id
+          secretAccessKey:
+            name: r2-creds
+            key: kasm-r2-secret-access-key
+
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://homelab-kasm
+      endpointURL: https://d322d8d4cf96aba84430eba5cc9ea9c9.r2.cloudflarestorage.com
+      s3Credentials:
+        accessKeyId:
+          name: r2-creds
+          key: kasm-r2-access-key-id
+        secretAccessKey:
+          name: r2-creds
+          key: kasm-r2-secret-access-key
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+    retentionPolicy: 7d
+
+  resources:
+    requests:
+      memory: 600Mi
+
+  managed:
+    services:
+      disabledDefaultServices:
+        - ro
+        - r
+      additional:
+        - selectorType: rw
+          serviceTemplate:
+            metadata:
+              name: kasm-db-lb
+              labels:
+                cilium-lb-pool: postgres-pool
+              annotations:
+                external-dns.alpha.kubernetes.io/hostname: kasm-db.6541333.xyz
+            spec:
+              type: LoadBalancer
