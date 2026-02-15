@@ -1,0 +1,10 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: hoppscotch-db-production
+spec:
+  immediate: true
+  schedule: "0 0 3 * * *" # Go cron package format, back up at 3AM
+  backupOwnerReference: cluster
+  cluster:
+    name: hoppscotch-db-production-cnpg-v1
