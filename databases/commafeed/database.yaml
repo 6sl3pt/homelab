@@ -43,6 +43,7 @@ spec:
 
   backup:
     barmanObjectStore:
+      serverName: commafeed-db-production-cnpg-v1-1
       destinationPath: s3://homelab-commafeed
       endpointURL: https://d322d8d4cf96aba84430eba5cc9ea9c9.r2.cloudflarestorage.com
       s3Credentials:
