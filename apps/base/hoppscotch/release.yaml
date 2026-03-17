@@ -1,0 +1,24 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: hoppscotch
+  namespace: hoppscotch
+
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: hoppscotch
+      version: "0.3.x"
+      sourceRef:
+        kind: HelmRepository
+        name: hoppscotch
+        namespace: hoppscotch
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: hoppscotch-values
+    - kind: Secret
+      name: hoppscotch-container-env
+      valuesKey: DATA_ENCRYPTION_KEY
+      targetPath: hoppscotch.backend.dataEncryptionKey

@@ -1,0 +1,41 @@
+deploymentMode: aio
+hoppscotch:
+  frontend:
+    adminUrl: https://hoppscotch.apps.6541333.xyz/admin
+    baseUrl: https://hoppscotch.apps.6541333.xyz
+    backendGqlUrl: https://hoppscotch.apps.6541333.xyz/backend/graphql
+    backendWsUrl: wss://hoppscotch.apps.6541333.xyz/backend/graphql
+    backendApiUrl: https://hoppscotch.apps.6541333.xyz/backend/v1
+    shortcodeBaseUrl: https://hoppscotch.apps.6541333.xyz
+  backend:
+    dataEncryptionKey: ""
+
+aio:
+  ingress:
+    enabled: true
+    ingressClassName: "cilium"
+    annotations:
+      external-dns.alpha.kubernetes.io/hostname: hoppscotch.apps.6541333.xyz
+      cert-manager.io/cluster-issuer: letsencrypt-production
+    hostname: hoppscotch.apps.6541333.xyz
+    path: /
+    pathType: Prefix
+    tls: true
+
+  persistence:
+    enabled: true
+    storageClass: "local-path"
+    accessModes:
+      - ReadWriteOnce
+    size: 5Gi
+    
+postgresql:
+  enabled: false
+
+externalDatabase:
+  host: "hoppscotch-db.6541333.xyz"
+  port: 5432
+  user: "hoppscotch"
+  database: "hoppscotch"
+  existingSecret: "hoppscotch-db-creds"
+  existingSecretPasswordKey: "password"
