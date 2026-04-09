@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: its-mytabs
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: guitar.6541333.xyz
+    cert-manager.io/cluster-issuer: letsencrypt-production
+spec:
+  ingressClassName: cilium
+  rules:
+    - host: guitar.6541333.xyz
+      http:
+        paths:
+          - backend:
+              service:
+                name: its-mytabs
+                port:
+                  number: 47777
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - guitar.6541333.xyz
+      secretName: its-mytabs-ingress
+
