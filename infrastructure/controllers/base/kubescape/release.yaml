@@ -1,0 +1,21 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kubescape-operator
+  namespace: kubescape
+
+spec:
+  releaseName: kubescape-operator
+  interval: 15m
+  chart:
+    spec:
+      chart: kubescape-operator
+      version: 1.30.6
+      sourceRef:
+        kind: HelmRepository
+        name: kubescape-operator
+        namespace: kubescape
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: kubescape-values

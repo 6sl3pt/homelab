@@ -1,0 +1,27 @@
+capabilities:
+  configurationScan: enable
+  continuousScan: enable
+  # runtimeDetection: enable
+  vulnerabilityScan: enable
+  prometheusExporter: enable
+
+kubescape:
+  serviceMonitor:
+    enabled: true
+    additionalLabels:
+      release: kube-prometheus-stack
+
+# nodeAgent:
+#   config:
+#     prometheusExporter: enable
+#   serviceMonitor:
+#     enable: true
+
+kubescapeScheduler:
+  scanSchedule: "0 0 * * *"
+
+kubevulnScheduler:
+  scanSchedule: "0 0 * * *"
+
+registryScanScheduler:
+  scanSchedule: "0 0 * * *"
