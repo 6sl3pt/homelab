@@ -7,4 +7,5 @@ resources:
   - cloudnativepg
   - external-dns
   - local-path
+  - reloader
   - kubescape
