@@ -73,6 +73,11 @@ spec:
         superuser: false
         passwordSecret:
           name: commafeed-db-creds
+      - name: forgejo
+        login: true
+        superuser: false
+        passwordSecret:
+          name: forgejo-db-creds
 
     services:
       disabledDefaultServices:
