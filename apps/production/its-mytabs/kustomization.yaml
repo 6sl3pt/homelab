@@ -3,3 +3,4 @@ kind: Kustomization
 namespace: its-mytabs
 resources:
   - ../../base/its-mytabs/
+  - ingress.yaml

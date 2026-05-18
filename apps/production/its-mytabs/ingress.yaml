@@ -3,12 +3,12 @@ kind: Ingress
 metadata:
   name: its-mytabs
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: guitar.6541333.xyz
+    external-dns.alpha.kubernetes.io/hostname: guitar.apps.6541333.xyz
     cert-manager.io/cluster-issuer: letsencrypt-production
 spec:
   ingressClassName: cilium
   rules:
-    - host: guitar.6541333.xyz
+    - host: guitar.apps.6541333.xyz
       http:
         paths:
           - backend:
@@ -20,6 +20,7 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - guitar.6541333.xyz
+        - guitar.apps.6541333.xyz
       secretName: its-mytabs-ingress
+
 
