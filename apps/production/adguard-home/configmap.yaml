@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: adguard-sync-config
+  namespace: adguard
+data:
+  ORIGIN_URL: "http://adguard-home-0.adguard-api.adguard.svc.cluster.local:5380"
+  ORIGIN_USERNAME: "admin"
+  REPLICA1_URL: "http://adguard-home-1.adguard-api.adguard.svc.cluster.local:5380"
+  REPLICA1_USERNAME: "admin"
+  CRON: "*/5 * * * *" # run every 5 minutes
+  RUN_ON_START: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rclone-config
+  namespace: adguard
+data:
+  RCLONE_CONFIG_R2_TYPE: "s3"
+  RCLONE_CONFIG_R2_PROVIDER: "Cloudflare"
+  RCLONE_CONFIG_R2_ENDPOINT: "https://d322d8d4cf96aba84430eba5cc9ea9c9.r2.cloudflarestorage.com"
+  RCLONE_CONFIG_CRYPT_TYPE: "crypt"
+  RCLONE_CONFIG_CRYPT_REMOTE: "r2:homelab-adguard/config-production"

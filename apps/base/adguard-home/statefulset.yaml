@@ -1,0 +1,216 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: adguard-home
+  namespace: adguard
+  annotations:
+    secret.reloader.stakater.com/reload: "adguard-tls-cert"
+spec:
+  serviceName: adguard-api
+  replicas: 2
+  minReadySeconds: 30
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: adguard-home
+  template:
+    metadata:
+      labels:
+        app: adguard-home
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      initContainers:
+        - name: pull-config
+          image: rclone/rclone:1.74
+          imagePullPolicy: IfNotPresent
+
+          envFrom:
+          - configMapRef:
+              name: rclone-config
+          - secretRef:
+              name: rclone-container-env
+
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+
+              if [ -f /opt/adguardhome/conf/AdGuardHome.yaml ]; then
+                echo "Config file already exists in volume. Skipping restore."
+              else
+                echo "Config file not found in volume, checking remote for configuration file..."
+
+                if ! rclone lsf crypt: --max-depth 1 | grep "AdGuardHome.yaml"; then
+                  echo "CRITICAL: Config file not found on remote. Failing pod start."
+                  exit 1
+                fi
+
+                echo "Config file found on remote. Restoring to /opt/adguardhome/conf/..."
+                rclone sync crypt: /opt/adguardhome/conf/ --verbose
+              fi
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+          volumeMounts:
+            - name: adguard-config
+              mountPath: /opt/adguardhome/conf
+
+          resources:
+            requests:
+              cpu: 5m
+              memory: 16Mi
+            limits:
+              cpu: 50m
+              memory: 32Mi
+
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - adguard-home
+              topologyKey: "kubernetes.io/hostname" # Ensure 1 pod per node
+
+      containers:
+      - name: adguard-home
+        image: adguard/adguardhome:v0.107.74
+        imagePullPolicy: IfNotPresent
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            add:
+              - NET_BIND_SERVICE
+            drop:
+              - ALL
+
+        ports:
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        - containerPort: 53
+          name: dns-udp
+          protocol: UDP
+        - containerPort: 443
+          name: https
+          protocol: TCP
+        - containerPort: 853
+          name: dns-tls
+          protocol: TCP
+        - containerPort: 5380
+          name: http
+          protocol: TCP
+
+        livenessProbe:
+          tcpSocket:
+            port: 5380
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        readinessProbe:
+          tcpSocket:
+            port: 443
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+        volumeMounts:
+        - name: adguard-data
+          mountPath: /opt/adguardhome/work/
+        - name: adguard-config
+          mountPath: /opt/adguardhome/conf/
+        - name: tls-certs
+          mountPath: /opt/adguardhome/ssl/
+          readOnly: true
+
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+      # rclone sidecar for config backup
+      - name: adguard-r2-sync
+        image: rclone/rclone:1.74
+        imagePullPolicy: IfNotPresent
+
+        envFrom:
+        - configMapRef:
+            name: rclone-config
+        - secretRef:
+            name: rclone-container-env
+
+        command:
+          - "sh"
+          - "-c"
+          - |
+            echo "HA Backup Sidecar Active. Monitoring config..."
+            while true; do
+              rclone sync /opt/adguardhome/conf/ crypt: \
+                --update \
+                --size-only \
+                --use-server-modtime \
+                --transfers 1
+ 
+              echo "Sync attempt finished at $(date). Sleeping 10m."
+              sleep 600
+            done
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+
+        volumeMounts:
+        - name: adguard-config
+          mountPath: /opt/adguardhome/conf/
+          readOnly: true
+
+        resources:
+          requests:
+            cpu: 2m
+            memory: 16Mi
+          limits:
+            cpu: 20m
+            memory: 64Mi
+
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: adguard-tls-cert
+
+  volumeClaimTemplates:
+  - metadata:
+      name: adguard-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: "local-path"
+
+  - metadata:
+      name: adguard-config
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: "local-path"

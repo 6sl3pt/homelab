@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adguard-sync
+  namespace: adguard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: adguard-sync
+  template:
+    metadata:
+      labels:
+        app: adguard-sync
+    spec:
+      containers:
+      - name: adguard-sync
+        image: ghcr.io/bakito/adguardhome-sync
+        imagePullPolicy: IfNotPresent
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1000
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
+
+        envFrom:
+        - configMapRef:
+            name: adguard-sync-config
+        - secretRef:
+            name: adguard-container-env
+
+        ports:
+        - containerPort: 8080
