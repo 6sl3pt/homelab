@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: uptime-kuma
+  namespace: uptime-kuma
 spec:
   replicas: 1
   selector:
@@ -18,10 +19,17 @@ spec:
     spec:
       containers:
         - name: uptime-kuma
-          image: louislam/uptime-kuma:2
+          image: louislam/uptime-kuma:2.3.2
 
           securityContext:
             allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
 
           envFrom:
             - secretRef:
@@ -31,12 +39,22 @@ spec:
             - containerPort: 3001
               protocol: TCP
 
+          volumeMounts:
+            - mountPath: /app/data
+              name: uptime-kuma-data
+
           resources:
             requests:
               memory: "256Mi"
-              cpu: "250m"
+              cpu: "100m"
             limits:
               memory: "512Mi"
               cpu: "500m"
 
       restartPolicy: Always
+
+      volumes:
+        - name: uptime-kuma-data
+          persistentVolumeClaim:
+            claimName: uptime-kuma-data
+
