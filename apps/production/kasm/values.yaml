@@ -22,7 +22,7 @@ proxyService:
 # CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 database:
   standalone: true
-  hostname: "kasm-db.6541333.xyz"
+  hostname: "kasm.db.6541333.xyz"
   port: 5432
   kasmDbName: "kasm-workspaces"
   kasmDbUser: "kasm"

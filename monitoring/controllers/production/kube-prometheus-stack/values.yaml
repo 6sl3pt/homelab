@@ -65,7 +65,7 @@ grafana:
       datasources:
         - name: CommaFeed DB
           type: postgres
-          url: commafeed-db.6541333.xyz:5432
+          url: commafeed.db.6541333.xyz:5432
           user: commafeed
           uid: commafeed-db
           secureJsonData:

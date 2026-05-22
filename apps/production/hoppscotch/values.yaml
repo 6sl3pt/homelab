@@ -33,7 +33,7 @@ postgresql:
   enabled: false
 
 externalDatabase:
-  host: "hoppscotch-db.6541333.xyz"
+  host: "hoppscotch.db.6541333.xyz"
   port: 5432
   user: "hoppscotch"
   database: "hoppscotch"

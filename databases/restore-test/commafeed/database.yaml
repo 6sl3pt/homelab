@@ -52,6 +52,6 @@ spec:
               labels:
                 cilium-lb-pool: postgres-pool
               annotations:
-                external-dns.alpha.kubernetes.io/hostname: commafeed-db-test.6541333.xyz
+                external-dns.alpha.kubernetes.io/hostname: commafeed-test.db.6541333.xyz
             spec:
               type: LoadBalancer
