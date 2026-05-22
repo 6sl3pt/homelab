@@ -160,16 +160,34 @@ spec:
           - "sh"
           - "-c"
           - |
-            echo "HA Backup Sidecar Active. Monitoring config..."
+            CONFIG_PATH="/opt/adguardhome/conf"
+            LAST_HASH=""
+
+            echo "$(date +"%Y-%m-%d %H:%M:%S") Sidecar started. Monitoring $CONFIG_PATH..."
+
             while true; do
-              rclone sync /opt/adguardhome/conf/ crypt: \
-                --update \
-                --size-only \
-                --use-server-modtime \
-                --transfers 1
- 
-              echo "Sync attempt finished at $(date). Sleeping 10m."
-              sleep 600
+              CURRENT_HASH=$(ls -lR "$CONFIG_PATH" | md5sum | awk '{print $1}')
+
+              if [ -z "$LAST_HASH" ]; then
+                LAST_HASH="$CURRENT_HASH"
+                echo "$(date +"%Y-%m-%d %H:%M:%S") Initial hash set: $LAST_HASH. Monitoring for changes..."
+              elif [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
+                echo "$(date +"%Y-%m-%d %H:%M:%S") CHANGE DETECTED (New Hash: $CURRENT_HASH)"
+                echo "$(date +"%Y-%m-%d %H:%M:%S") Waiting 5 minutes for writes to stabilize..."
+                
+                LAST_HASH="$CURRENT_HASH"
+                sleep 300
+
+                echo "$(date +"%Y-%m-%d %H:%M:%S") Starting rclone sync..."
+                if rclone sync "$CONFIG_PATH" crypt: --update --size-only --use-server-modtime --transfers 1; then
+                   echo "$(date +"%Y-%m-%d %H:%M:%S") Sync successful. Resuming monitor."
+                else
+                   echo "$(date +"%Y-%m-%d %H:%M:%S") ERROR: Sync failed. Will retry on next check."
+                fi
+              fi
+
+              # 4. Idle wait (adjust frequency here)
+              sleep 60
             done
 
         securityContext:
