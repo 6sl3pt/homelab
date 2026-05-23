@@ -3,4 +3,7 @@ kind: Kustomization
 resources:
   - namespace.yaml
   - service.yaml
+  - storage.yaml
   - deployment.yaml
+  - secrets.yaml
+  - cronjob.yaml

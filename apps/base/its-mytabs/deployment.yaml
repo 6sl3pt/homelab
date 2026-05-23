@@ -31,6 +31,10 @@ spec:
             - containerPort: 47777
               protocol: TCP
 
+          volumeMounts:
+            - mountPath: /app/data/
+              name: its-mytabs-data
+
           resources:
             requests:
               memory: "128Mi"
@@ -40,3 +44,9 @@ spec:
               cpu: "200m"
 
       restartPolicy: Always
+
+      volumes:
+        - name: its-mytabs-data
+          persistentVolumeClaim:
+            claimName: its-mytabs-data
+
