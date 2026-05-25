@@ -7,3 +7,4 @@ resources:
   - service.yaml
   - storage.yaml
   - deployment.yaml
+  - cronjob.yaml

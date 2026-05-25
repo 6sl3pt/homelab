@@ -3,3 +3,4 @@ kind: Kustomization
 namespace: uptime-kuma
 resources:
   - ../../base/uptime-kuma/
+  - configmap.yaml
