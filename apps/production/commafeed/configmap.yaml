@@ -4,4 +4,5 @@ metadata:
   name: commafeed-configmap
 data:
   QUARKUS_DATASOURCE_DB_KIND: "postgresql"
-  QUARKUS_DATASOURCE_JDBC_URL: "jdbc:postgresql://commafeed.db.6541333.xyz:5432/commafeed"
+  QUARKUS_DATASOURCE_JDBC_URL: "jdbc:postgresql://cnpg.db.6541333.xyz:5432/commafeed"
+  QUARKUS_DATASOURCE_USERNAME: "commafeed"
