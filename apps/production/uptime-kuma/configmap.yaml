@@ -9,3 +9,4 @@ data:
   RCLONE_CONFIG_R2_ENDPOINT: "https://d322d8d4cf96aba84430eba5cc9ea9c9.r2.cloudflarestorage.com"
   RCLONE_CONFIG_CRYPT_TYPE: "crypt"
   RCLONE_CONFIG_CRYPT_REMOTE: "r2:homelab-rclone-backup/uptime-kuma/production/data"
+  RCLONE_VERBOSE: "1"

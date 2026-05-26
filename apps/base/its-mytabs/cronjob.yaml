@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: rclone-daily-sync
+  name: its-mytabs-rclone-scheduler
   namespace: its-mytabs
 spec:
   schedule: "0 0 * * *"
@@ -31,8 +31,7 @@ spec:
               - "--update"
               - "--size-only"
               - "--use-server-modtime"
-              - "--transfers=1"
-              - "--config=/config/rclone.conf"
+              - "--transfers=4"
 
             securityContext:
               allowPrivilegeEscalation: false
