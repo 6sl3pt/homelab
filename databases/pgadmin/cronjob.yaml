@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pgadmin-rclone-scheduler
+  namespace: pgadmin
+spec:
+  schedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        spec:
+          containers:
+          - name: rclone
+            image: rclone/rclone:1.74
+
+            envFrom:
+            - configMapRef:
+                name: rclone-config
+            - secretRef:
+                name: rclone-container-env
+
+            command: ["rclone"]
+            args:
+              - sync
+              - /var/lib/pgadmin
+              - "crypt:"
+              - "--update"
+              - "--size-only"
+              - "--use-server-modtime"
+              - "--transfers=4"
+              # --- Exclusion Rules ---
+              - "--exclude"
+              - "sessions/**"
+              - "--exclude"
+              - "session/**"
+              - "--exclude"
+              - "*.log"
+              - "--exclude"
+              - "azure_credential_cache/**"
+              - "--exclude"
+              - "kerberos_ccache/**"
+
+            securityContext:
+              allowPrivilegeEscalation: false
+              runAsNonRoot: true
+              runAsUser: 5050
+              capabilities:
+                drop:
+                  - ALL
+              seccompProfile:
+                type: RuntimeDefault
+
+            volumeMounts:
+            - name: pgadmin-data
+              mountPath: /var/lib/pgadmin
+
+          restartPolicy: OnFailure
+
+          volumes:
+          - name: pgadmin-data
+            persistentVolumeClaim:
+              claimName: pgadmin-data
+
