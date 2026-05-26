@@ -1,0 +1,91 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-db-production-v1
+  namespace: cloudnative-pg
+spec:
+  description: Postgres cluster for homelab applications
+  imageName: quay.io/enterprisedb/postgresql:17.7
+  instances: 3
+
+  monitoring:
+    enablePodMonitor: true
+
+  inheritedMetadata:
+    labels:
+      app: cnpg-database
+      policy-type: "database"
+
+  storage:
+    size: 5Gi
+
+  # bootstrap:
+  #   recovery:
+  #     source: cluster-backup
+  #
+  # externalClusters:
+  #   - name: cluster-backup
+  #     barmanObjectStore:
+  #       destinationPath: s3://s3://homelab-cnpg/production/
+  #       endpointURL: https://d322d8d4cf96aba84430eba5cc9ea9c9.r2.cloudflarestorage.com
+  #       serverName: v1
+  #       s3Credentials:
+  #         accessKeyId:
+  #           name: r2-creds
+  #           key: cnpg-r2-access-key-id
+  #         secretAccessKey:
+  #           name: r2-creds
+  #           key: cnpg-r2-secret-access-key
+
+  backup:
+    barmanObjectStore:
+      serverName: v1
+      destinationPath: s3://homelab-cnpg/production/
+      endpointURL: https://d322d8d4cf96aba84430eba5cc9ea9c9.r2.cloudflarestorage.com
+      s3Credentials:
+        accessKeyId:
+          name: r2-creds
+          key: cnpg-r2-access-key-id
+        secretAccessKey:
+          name: r2-creds
+          key: cnpg-r2-secret-access-key
+      wal:
+        compression: gzip
+      data:
+        compression: gzip
+    retentionPolicy: 7d
+
+  resources:
+    requests:
+      memory: 600Mi
+
+  enableSuperuserAccess: true
+  superuserSecret:
+    name: cnpg-superuser-creds
+
+  managed:
+    roles:
+      - name: app
+        ensure: absent
+        comment: "Delete default app user"
+      - name: commafeed
+        login: true
+        superuser: false
+        passwordSecret:
+          name: commafeed-db-creds
+
+    services:
+      disabledDefaultServices:
+        - ro
+        - r
+      additional:
+        - selectorType: rw
+          serviceTemplate:
+            metadata:
+              name: cnpg-db-lb
+              labels:
+                cilium-lb-pool: postgres-pool
+              annotations:
+                external-dns.alpha.kubernetes.io/hostname: cnpg.db.6541333.xyz
+            spec:
+              type: LoadBalancer
