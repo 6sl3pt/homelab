@@ -19,9 +19,12 @@ kubescape:
 
 kubescapeScheduler:
   scanSchedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
 
 kubevulnScheduler:
   scanSchedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
 
 registryScanScheduler:
   scanSchedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 1
