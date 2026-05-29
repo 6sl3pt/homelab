@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: stirling-pdf
+  namespace: stirling-pdf
 spec:
   replicas: 1
   selector:
@@ -18,10 +19,19 @@ spec:
     spec:
       containers:
         - name: stirling-pdf
-          image: stirlingtools/stirling-pdf:2.9.2
+          image: stirlingtools/stirling-pdf:2.10.1
 
           securityContext:
             allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - CHOWN
+                - SETUID
+                - SETGID
+            seccompProfile:
+              type: RuntimeDefault
 
           envFrom:
             - configMapRef:
@@ -33,6 +43,18 @@ spec:
             - containerPort: 8083
               protocol: TCP
 
+          volumeMounts:
+            - mountPath: /configs
+              name: stirling-pdf-data
+            - mountPath: /tmp
+              name: tmp-volume
+            - mountPath: /logs
+              name: logs-volume
+            - mountPath: /pipeline
+              name: pipeline-volume
+            - mountPath: /customFiles
+              name: customfiles-volume
+
           resources:
             requests:
               memory: "1Gi"
@@ -40,5 +62,20 @@ spec:
             limits:
               memory: "2Gi"
               cpu: "1"
+              ephemeral-storage: "5Gi"
 
       restartPolicy: Always
+
+      volumes:
+        - name: stirling-pdf-data
+          persistentVolumeClaim:
+            claimName: stirling-pdf-data
+        - name: tmp-volume
+          emptyDir: {}
+        - name: logs-volume
+          emptyDir: {}
+        - name: pipeline-volume
+          emptyDir: {}
+        - name: customfiles-volume
+          emptyDir: {}
+

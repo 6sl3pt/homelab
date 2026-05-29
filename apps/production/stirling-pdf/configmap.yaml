@@ -3,6 +3,9 @@ kind: ConfigMap
 metadata:
   name: stirling-pdf-configmap
 data:
+  PUID: "1000"
+  GUID: "1000"
+  HOME: "/tmp"
   SERVER_PORT: "8083"
   JAVA_TOOL_OPTIONS: "-Xmx1800m"
   DOCKER_ENABLE_SECURITY: "true"
