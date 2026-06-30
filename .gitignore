@@ -2,3 +2,5 @@ talosconfig
 kubeconfig
 talos/base/*.yaml
 talos/manifest/*
+
+devbox.lock
