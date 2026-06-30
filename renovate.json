@@ -1,9 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "timezone": "Asia/Bangkok",
-  "schedule": ["* 18-22 * * 0,6"],
-  "description": "Schedule at 18-22PM every weekend",
+  "extends": ["config:recommended", ":pinVersions"],
+  "flux": {
+    "fileMatch": ["\\.yaml$"]
+  },
   "kubernetes": {
     "fileMatch": ["\\.yaml$"]
-  }
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["flux", "kubernetes"],
+      "separateMinorPatch": true
+    }
+  ],
+  "dependencyDashboard": true,
+  "minimumReleaseAge": "7 days"
 }
