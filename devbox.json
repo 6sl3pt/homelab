@@ -3,7 +3,7 @@
   "packages": [
     "kubectl@latest",
     "helm@latest",
-    "talosctl@latest",
+    "talosctl@0.14.3",
     "k9s@latest"
   ],
   "shell": {
