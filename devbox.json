@@ -4,7 +4,7 @@
     "kubectl@latest",
     "helm@latest",
     "talosctl@latest",
-    "k9s@latest"
+    "k9s@0.50.18"
   ],
   "shell": {
     "init_hook": [
