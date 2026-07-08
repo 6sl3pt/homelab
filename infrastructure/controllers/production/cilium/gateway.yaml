@@ -1,0 +1,28 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: cilium-gateway
+  namespace: kube-system
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+    - name: hubble
+      protocol: HTTPS
+      port: 443
+      hostname: hubble.apps.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: hubble-apps-tls
+      allowedRoutes:
+        namespaces:
+          from: All

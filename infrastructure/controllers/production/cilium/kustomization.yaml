@@ -3,7 +3,8 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - ../../base/cilium
-  - ingress.yaml
+  - gateway.yaml
+  - routes.yaml
 
 configMapGenerator:
   - name: cilium-values

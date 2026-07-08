@@ -5,12 +5,7 @@ resources:
   - namespace.yaml
   - repository.yaml
   - release.yaml
-  - secret.yaml
-
-configMapGenerator:
-  - name: external-dns-values
-    files:
-      - values.yaml=values.yaml
+  - secrets.yaml
 
 configurations:
   - configmap.yaml

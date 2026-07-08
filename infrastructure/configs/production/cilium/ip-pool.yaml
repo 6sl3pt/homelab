@@ -1,54 +1,53 @@
-apiVersion: "cilium.io/v2alpha1"
+apiVersion: 'cilium.io/v2alpha1'
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: static-ip-pool
   namespace: kube-system
 spec:
   blocks:
-    - start: "10.134.20.40"
-      stop: "10.134.20.59"
+    - start: '10.134.20.40'
+      stop: '10.134.20.59'
   serviceSelector:
     matchLabels:
       cilium-lb-pool: static-ip-pool
 ---
-apiVersion: "cilium.io/v2alpha1"
+apiVersion: 'cilium.io/v2alpha1'
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: ingress-pool
   namespace: kube-system
 spec:
   blocks:
-    - start: "10.134.20.100"
-      stop: "10.134.20.149"
+    - start: '10.134.20.100'
+      stop: '10.134.20.149'
 
   serviceSelector:
     matchLabels:
-      cilium.io/ingress: "true"
+      cilium.io/ingress: 'true'
 ---
-apiVersion: "cilium.io/v2alpha1"
+apiVersion: 'cilium.io/v2alpha1'
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: apps-pool
   namespace: kube-system
 spec:
   blocks:
-    - start: "10.134.20.150"
-      stop: "10.134.20.199"
+    - start: '10.134.20.150'
+      stop: '10.134.20.199'
 
   serviceSelector:
     matchLabels:
       cilium-lb-pool: apps-pool
 ---
-apiVersion: "cilium.io/v2alpha1"
+apiVersion: 'cilium.io/v2alpha1'
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: postgres-pool
   namespace: kube-system
 spec:
   blocks:
-    - start: "10.134.20.200"
-      stop: "10.134.20.249"
+    - start: '10.134.20.200'
+      stop: '10.134.20.249'
   serviceSelector:
     matchLabels:
       cilium-lb-pool: postgres-pool
-
