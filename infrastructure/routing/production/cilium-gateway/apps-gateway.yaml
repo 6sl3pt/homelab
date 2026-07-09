@@ -1,8 +1,8 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: cilium-apps-gateway
-  namespace: kube-system
+  name: apps-gateway
+  namespace: cilium-gateway
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-production
     cilium.io/lb-ipam-pool: gateway-pool
@@ -27,7 +27,12 @@ spec:
             name: hubble-apps-tls
       allowedRoutes:
         namespaces:
-          from: Same
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        kinds:
+          - kind: HTTPRoute
 
     - name: grafana
       protocol: HTTPS
