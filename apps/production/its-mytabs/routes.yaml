@@ -5,8 +5,8 @@ metadata:
   namespace: its-mytabs
 spec:
   parentRefs:
-    - name: cilium-apps-gateway
-      namespace: kube-system
+    - name: apps-gateway
+      namespace: cilium-gateway
       sectionName: its-mytabs
   hostnames:
     - guitar.apps.6541333.xyz
