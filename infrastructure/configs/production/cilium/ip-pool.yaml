@@ -14,16 +14,12 @@ spec:
 apiVersion: 'cilium.io/v2alpha1'
 kind: CiliumLoadBalancerIPPool
 metadata:
-  name: ingress-pool
+  name: gateway-pool
   namespace: kube-system
 spec:
   blocks:
     - start: '10.134.20.100'
       stop: '10.134.20.149'
-
-  serviceSelector:
-    matchLabels:
-      cilium.io/ingress: 'true'
 ---
 apiVersion: 'cilium.io/v2alpha1'
 kind: CiliumLoadBalancerIPPool

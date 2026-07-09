@@ -1,0 +1,66 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: cilium-apps-gateway
+  namespace: kube-system
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    cilium.io/lb-ipam-pool: gateway-pool
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: hubble
+      protocol: HTTPS
+      port: 443
+      hostname: hubble.apps.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: hubble-apps-tls
+      allowedRoutes:
+        namespaces:
+          from: Same
+
+    - name: grafana
+      protocol: HTTPS
+      port: 443
+      hostname: grafana.apps.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: grafana-apps-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+        kinds:
+          - kind: HTTPRoute
+
+    - name: its-mytabs
+      protocol: HTTPS
+      port: 443
+      hostname: guitar.apps.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: its-mytabs-apps-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: its-mytabs
+        kinds:
+          - kind: HTTPRoute

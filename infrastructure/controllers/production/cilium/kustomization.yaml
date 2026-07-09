@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: kube-system
 resources:
   - ../../base/cilium
-  - gateway.yaml
+  - apps-gateway.yaml
   - routes.yaml
 
 configMapGenerator:
