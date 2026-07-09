@@ -1,0 +1,20 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: its-mytabs
+  namespace: its-mytabs
+spec:
+  parentRefs:
+    - name: cilium-apps-gateway
+      namespace: kube-system
+      sectionName: its-mytabs
+  hostnames:
+    - guitar.apps.6541333.xyz
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: its-mytabs
+          port: 47777
