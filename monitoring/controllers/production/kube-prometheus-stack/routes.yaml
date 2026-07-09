@@ -5,8 +5,8 @@ metadata:
   namespace: monitoring
 spec:
   parentRefs:
-    - name: cilium-apps-gateway
-      namespace: kube-system
+    - name: apps-gateway
+      namespace: cilium-gateway
       sectionName: grafana
   hostnames:
     - grafana.apps.6541333.xyz
