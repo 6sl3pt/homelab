@@ -5,4 +5,5 @@ resources:
   - ../../base/cilium-gateway
   - apps-gateway.yaml
   - db-gateway.yaml
+  - dns-gateway.yaml
   - routes.yaml

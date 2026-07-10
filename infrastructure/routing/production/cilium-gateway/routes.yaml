@@ -11,6 +11,9 @@ spec:
     - name: db-gateway
       namespace: cilium-gateway
       sectionName: http
+    - name: adguard-dns-gateway
+      namespace: cilium-gateway
+      sectionName: http
   rules:
     - filters:
         - type: RequestRedirect
