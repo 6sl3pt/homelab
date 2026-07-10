@@ -8,5 +8,5 @@ resources:
   - service.yaml
   - storage.yaml
   - deployment.yaml
-  - ingress.yaml
+  - routes.yaml
   - cronjob.yaml
