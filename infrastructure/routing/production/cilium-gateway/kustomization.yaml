@@ -4,4 +4,5 @@ namespace: cilium-gateway
 resources:
   - ../../base/cilium-gateway
   - apps-gateway.yaml
+  - db-gateway.yaml
   - routes.yaml

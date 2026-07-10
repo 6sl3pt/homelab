@@ -1,0 +1,35 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: db-gateway
+  namespace: cilium-gateway
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+    cilium.io/lb-ipam-pool: gateway-pool
+spec:
+  gatewayClassName: cilium
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
+
+    - name: pgadmin
+      protocol: HTTPS
+      port: 443
+      hostname: pgadmin.db.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: pgadmin-db-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: pgadmin
+        kinds:
+          - kind: HTTPRoute
