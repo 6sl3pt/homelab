@@ -4,15 +4,10 @@ metadata:
   name: adguard-dns
   namespace: adguard
   annotations:
-    external-dns.alpha.kubernetes.io/hostname: dns.6541333.xyz
-    io.cilium/lb-ipam-ips: "10.134.20.53"
+    io.cilium/lb-ipam-ips: '10.134.20.53'
   labels:
     cilium-lb-pool: static-ip-pool
 spec:
-  # sessionAffinity: ClientIP
-  # sessionAffinityConfig:
-  #   clientIP:
-  #     timeoutSeconds: 3600
   selector:
     app: adguard-home
   ports:
@@ -24,13 +19,23 @@ spec:
       targetPort: 53
       name: dns-udp
       protocol: UDP
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adguard-dns-secure
+  namespace: adguard
+spec:
+  selector:
+    app: adguard-home
+  ports:
     - port: 443
       targetPort: 443
       name: dns-https
     - port: 853
       targetPort: 853
       name: dns-tls
-  type: LoadBalancer
 ---
 apiVersion: v1
 kind: Service
