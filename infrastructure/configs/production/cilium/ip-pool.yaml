@@ -1,4 +1,4 @@
-apiVersion: 'cilium.io/v2alpha1'
+apiVersion: 'cilium.io/v2'
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: static-ip-pool
@@ -11,7 +11,7 @@ spec:
     matchLabels:
       cilium-lb-pool: static-ip-pool
 ---
-apiVersion: 'cilium.io/v2alpha1'
+apiVersion: 'cilium.io/v2'
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: gateway-pool
@@ -21,7 +21,7 @@ spec:
     - start: '10.134.20.100'
       stop: '10.134.20.149'
 ---
-apiVersion: 'cilium.io/v2alpha1'
+apiVersion: 'cilium.io/v2'
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: postgres-pool
