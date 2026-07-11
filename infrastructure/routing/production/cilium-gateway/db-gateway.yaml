@@ -8,6 +8,9 @@ metadata:
     cilium.io/lb-ipam-pool: gateway-pool
 spec:
   gatewayClassName: cilium
+  addresses:
+    - type: IPAddress
+      value: 10.134.20.102
   listeners:
     - name: http
       protocol: HTTP
