@@ -1,12 +1,15 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata:
-  name: adguard-dns-gateway
+  name: dns-gateway
   namespace: cilium-gateway
   annotations:
     cilium.io/lb-ipam-pool: gateway-pool
 spec:
   gatewayClassName: cilium
+  addresses:
+    - type: IPAddress
+      value: 10.134.20.103
   listeners:
     - name: http
       protocol: HTTP
@@ -15,21 +18,26 @@ spec:
         namespaces:
           from: All
 
-    - name: dns-tls
-      protocol: TLS
-      port: 853
+    - name: dns-https
+      protocol: HTTPS
+      port: 443
+      hostname: dns.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: adguard-tls-cert
+            namespace: adguard
       allowedRoutes: &allow_adguard
         namespaces:
           from: Selector
           selector:
             matchLabels:
               kubernetes.io/metadata.name: adguard
-      tls:
-        mode: Passthrough
 
-    - name: dns-https
+    - name: dns-tls
       protocol: TLS
-      port: 443
+      port: 853
       allowedRoutes: *allow_adguard
       tls:
         mode: Passthrough
