@@ -1,7 +1,7 @@
 apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
+kind: TLSRoute
 metadata:
-  name: adguard
+  name: adguard-https-passthrough
   namespace: adguard
 spec:
   parentRefs:
@@ -11,18 +11,14 @@ spec:
   hostnames:
     - dns.6541333.xyz
   rules:
-    - matches:
-        - path:
-            type: PathPrefix
-            value: /
-      backendRefs:
+    - backendRefs:
         - name: adguard-dns-secure
           port: 443
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: TLSRoute
 metadata:
-  name: adguard
+  name: adguard-tls
   namespace: adguard
 spec:
   parentRefs:

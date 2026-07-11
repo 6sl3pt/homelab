@@ -19,15 +19,11 @@ spec:
           from: All
 
     - name: dns-https
-      protocol: HTTPS
+      protocol: TLS
       port: 443
       hostname: dns.6541333.xyz
       tls:
-        mode: Terminate
-        certificateRefs:
-          - kind: Secret
-            name: adguard-tls-cert
-            namespace: adguard
+        mode: Passthrough
       allowedRoutes: &allow_adguard
         namespaces:
           from: Selector
@@ -38,6 +34,7 @@ spec:
     - name: dns-tls
       protocol: TLS
       port: 853
+      hostname: dns.6541333.xyz
       allowedRoutes: *allow_adguard
       tls:
         mode: Passthrough

@@ -10,18 +10,3 @@ spec:
     kind: ClusterIssuer
   dnsNames:
     - dns.6541333.xyz
----
-apiVersion: gateway.networking.k8s.io/v1beta1
-kind: ReferenceGrant
-metadata:
-  name: gateway-secret-grant
-  namespace: adguard
-spec:
-  from:
-    - group: gateway.networking.k8s.io
-      kind: Gateway
-      namespace: cilium-gateway
-  to:
-    - group: ''
-      kind: Secret
-      name: adguard-tls-cert
