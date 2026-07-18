@@ -14,7 +14,7 @@ spec:
   inheritedMetadata:
     labels:
       app: cnpg-database
-      policy-type: "database"
+      policy-type: 'database'
 
   storage:
     size: 5Gi
@@ -67,7 +67,7 @@ spec:
     roles:
       - name: app
         ensure: absent
-        comment: "Delete default app user"
+        comment: 'Delete default app user'
       - name: commafeed
         login: true
         superuser: false
@@ -78,6 +78,11 @@ spec:
         superuser: false
         passwordSecret:
           name: forgejo-db-creds
+      - name: authelia
+        login: true
+        superuser: false
+        passwordSecret:
+          name: authelia-db-creds
 
     services:
       disabledDefaultServices:

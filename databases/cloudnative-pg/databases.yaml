@@ -32,3 +32,14 @@ spec:
     name: cnpg-db-production-v1
   name: forgejo
   owner: forgejo
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: cnpg-db-production-v1-authelia
+  namespace: cloudnative-pg
+spec:
+  cluster:
+    name: cnpg-db-production-v1
+  name: authelia
+  owner: authelia
