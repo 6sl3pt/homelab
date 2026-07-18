@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: authelia
+resources:
+  - ../../base/authelia
+  - ../../base/cloudflared
+  - secrets.yaml
+  - users.yaml
+  - cloudflare.yaml
+
+configMapGenerator:
+  - name: authelia-values
+    files:
+      - values.yaml=values.yaml

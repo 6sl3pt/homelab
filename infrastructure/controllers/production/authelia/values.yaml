@@ -1,0 +1,132 @@
+secret:
+  mountPath: /config/secrets
+  existingSecret: authelia-secrets
+  additionalSecrets:
+    authelia-secrets: {}
+
+configMap:
+  theme: dark
+
+  server:
+    port: 9091
+
+  session:
+    name: authelia_session
+    encryption_key:
+      secret_name: authelia-secrets
+      path: session-secret
+    cookies:
+      - subdomain: 'auth'
+        domain: '6541333.xyz'
+
+  storage:
+    encryption_key:
+      secret_name: authelia-secrets
+      path: storage-encryption-key
+    postgres:
+      enabled: true
+      deploy: false
+      address: 'tcp://cnpg.db.6541333.xyz:5432'
+      database: authelia
+      username: authelia
+      password:
+        secret_name: authelia-secrets
+        path: db-password
+
+  notifier:
+    filesystem:
+      enabled: true
+      filename: '/config/notification.txt'
+
+  authentication_backend:
+    password_reset:
+      disable: true
+    password_change:
+      disable: true
+    file:
+      enabled: true
+      path: '/config/users/users.yaml'
+      watch: true
+
+  access_control:
+    default_policy: 'deny'
+    rules:
+      - domain: 'auth.6541333.xyz'
+        resources:
+          - '^/.*$'
+        policy: bypass
+      - domain: 'commafeed.6541333.xyz'
+        policy: one_factor
+      - domain: 'pdf.6541333.xyz'
+        policy: one_factor
+      - domain: 'status.6541333.xyz'
+        policy: one_factor
+
+  identity_validation:
+    reset_password:
+      secret:
+        secret_name: authelia-secrets
+        path: jwt-secret
+
+  identity_providers:
+    oidc:
+      enabled: true
+      hmac_secret:
+        secret_name: authelia-secrets
+        path: oidc-hmac
+      jwks:
+        - algorithm: 'RS256'
+          use: 'sig'
+          key:
+            path: '/config/jwks/oidc-private.pem'
+      claims_policies:
+        cloudflare:
+          id_token:
+            - rat
+            - groups
+            - email
+            - email_verified
+            - alt_emails
+            - preferred_username
+            - name
+      clients:
+        - client_id: 'cloudflare'
+          claims_policy: cloudflare
+          client_name: 'Cloudflare Zero Trust'
+          client_secret:
+            path: '/config/secrets/authelia-secrets/cloudflare-secret'
+          public: false
+          require_pkce: true
+          pkce_challenge_method: 'S256'
+          authorization_policy: 'one_factor'
+          redirect_uris:
+            - 'https://phudittha.cloudflareaccess.com/cdn-cgi/access/callback'
+          scopes:
+            - 'openid'
+            - 'profile'
+            - 'email'
+            - 'groups'
+          response_types:
+            - 'code'
+          grant_types:
+            - 'authorization_code'
+
+pod:
+  extraVolumes:
+    - name: oidc-key
+      secret:
+        secretName: authelia-oidc-key
+    - name: users
+      secret:
+        secretName: authelia-users
+
+  extraVolumeMounts:
+    - name: oidc-key
+      mountPath: /config/jwks
+      readOnly: true
+    - name: users
+      mountPath: /config/users
+      readOnly: true
+
+service:
+  port: 9091

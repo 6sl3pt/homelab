@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared
+  namespace: authelia
+data:
+  config.yaml: |
+    # Name of the tunnel you want to run
+    tunnel: homelab-authelia
+    credentials-file: /etc/cloudflared/creds/credentials.json
+
+    metrics: 0.0.0.0:2000
+
+    no-autoupdate: true
+
+    ingress:
+    - hostname: auth.6541333.xyz
+      service: http://authelia:9091
+
+    # This rule matches any traffic which didn't match a previous rule, and responds with HTTP 404.
+    - service: http_status:404

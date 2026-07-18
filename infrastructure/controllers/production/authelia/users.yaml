@@ -1,0 +1,44 @@
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: authelia-users
+  namespace: authelia
+spec:
+  refreshInterval: '0'
+  secretStoreRef:
+    name: azure-kv-store
+    kind: ClusterSecretStore
+  target:
+    name: authelia-users
+    template:
+      engineVersion: v2
+      data:
+        users.yaml: |
+          users:
+            admin:
+              disabled: false
+              displayname: "Authelia Admin"
+              password: "{{ .admin_password_hash }}"
+              email: "{{ .admin_email }}"
+              groups:
+                - admins
+                - dev
+
+            phudit:
+              disabled: false
+              displayname: "Phudit T."
+              password: "{{ .phudit_password_hash }}"
+              email: "eochannelformal@gmail.com"
+              groups:
+                - dev
+
+  data:
+    - secretKey: admin_email
+      remoteRef:
+        key: authelia-admin-email
+    - secretKey: admin_password_hash
+      remoteRef:
+        key: authelia-admin-password-hash
+    - secretKey: phudit_password_hash
+      remoteRef:
+        key: authelia-phudit-password-hash
