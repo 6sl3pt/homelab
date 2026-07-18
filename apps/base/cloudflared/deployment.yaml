@@ -11,11 +11,21 @@ spec:
     metadata:
       labels:
         app: cloudflared
-        policy-type: "app"
+        policy-type: 'app'
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
         - name: cloudflared
           image: cloudflare/cloudflared:2026.7.1
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           args:
             - tunnel
             - --config
@@ -43,11 +53,11 @@ spec:
 
           resources:
             requests:
-              cpu: "25m"
-              memory: "64Mi"
+              cpu: '25m'
+              memory: '64Mi'
             limits:
-              cpu: "100m"
-              memory: "128Mi"
+              cpu: '100m'
+              memory: '128Mi'
 
       restartPolicy: Always
 
