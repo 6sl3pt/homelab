@@ -1,19 +1,6 @@
 apiVersion: 'cilium.io/v2'
 kind: CiliumLoadBalancerIPPool
 metadata:
-  name: static-ip-pool
-  namespace: kube-system
-spec:
-  blocks:
-    - start: '10.134.20.40'
-      stop: '10.134.20.59'
-  serviceSelector:
-    matchLabels:
-      cilium-lb-pool: static-ip-pool
----
-apiVersion: 'cilium.io/v2'
-kind: CiliumLoadBalancerIPPool
-metadata:
   name: gateway-pool
   namespace: kube-system
 spec:
