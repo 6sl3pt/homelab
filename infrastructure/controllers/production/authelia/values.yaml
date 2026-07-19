@@ -149,6 +149,8 @@ configMap:
             - 'authorization_code'
 
 pod:
+  kind: 'Deployment'
+
   extraVolumes:
     - name: oidc-key
       secret:
