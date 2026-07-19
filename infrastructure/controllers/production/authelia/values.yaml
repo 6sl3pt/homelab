@@ -48,7 +48,7 @@ configMap:
     #   filename: '/config/notification.txt'
     smtp:
       enabled: true
-      address: 'smtp://msmtpd.msmtpd.svc.cluster.local:2500'
+      address: 'smtp://postfix-mail.postfix.svc.cluster.local:587'
       sender: 'Authelia <eochannelformal@gmail.com>'
       startup_check_address: 'eochannelformal@gmail.com'
       identifier: 'authelia'

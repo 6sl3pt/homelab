@@ -1,0 +1,19 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: postfix
+  namespace: postfix
+spec:
+  interval: 30m
+  chart:
+    spec:
+      chart: mail
+      version: 5.1.0
+      sourceRef:
+        kind: HelmRepository
+        name: postfix
+        namespace: postfix
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: postfix-values

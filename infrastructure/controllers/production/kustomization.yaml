@@ -8,6 +8,6 @@ resources:
   - external-dns
   - local-path
   - reloader
-  - msmtpd
+  - postfix
   - authelia
   - kubescape
