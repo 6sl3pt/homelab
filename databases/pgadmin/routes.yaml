@@ -15,6 +15,35 @@ spec:
         - path:
             type: PathPrefix
             value: /
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: X-Forwarded-Proto
+                value: https
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            http:
+              path: /api/authz/ext-authz/
+              allowedHeaders:
+                - Cookie
+                - Accept
+                - X-Forwarded-Proto
+                - X-Forwarded-Host
+                - X-Forwarded-Uri
+                - X-Forwarded-Method
+              allowedResponseHeaders:
+                - Remote-User
+                - Remote-Groups
+
+            backendRef:
+              group: ''
+              kind: Service
+              name: authelia
+              namespace: authelia
+              port: 9091
+
       backendRefs:
         - name: pgadmin
           port: 3004

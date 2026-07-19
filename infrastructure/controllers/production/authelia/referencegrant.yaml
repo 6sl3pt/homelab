@@ -12,3 +12,48 @@ spec:
     - group: ''
       kind: Service
       name: authelia
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-grafana-ext-authz
+  namespace: authelia
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: monitoring
+  to:
+    - group: ''
+      kind: Service
+      name: authelia
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-pgadmin-ext-authz
+  namespace: authelia
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: pgadmin
+  to:
+    - group: ''
+      kind: Service
+      name: authelia
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-its-mytabs-ext-authz
+  namespace: authelia
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: its-mytabs
+  to:
+    - group: ''
+      kind: Service
+      name: authelia

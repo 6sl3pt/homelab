@@ -74,14 +74,30 @@ configMap:
     rules:
       - domain: 'auth.6541333.xyz'
         policy: bypass
+
       - domain: 'commafeed.6541333.xyz'
         policy: one_factor
       - domain: 'pdf.6541333.xyz'
         policy: one_factor
       - domain: 'status.6541333.xyz'
         policy: one_factor
-      - domain: 'hubble.apps.6541333.xyz'
+      - domain: 'guitar.apps.6541333.xyz'
         policy: one_factor
+
+      - domain: 'hubble.apps.6541333.xyz'
+        policy: two_factor
+        subject:
+          - 'group:admins'
+
+      - domain: 'grafana.apps.6541333.xyz'
+        policy: two_factor
+        subject:
+          - 'group:admins'
+
+      - domain: 'pgadmin.db.6541333.xyz'
+        policy: two_factor
+        subject:
+          - 'group:admins'
 
   identity_validation:
     reset_password:
