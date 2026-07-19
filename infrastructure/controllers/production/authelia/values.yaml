@@ -68,6 +68,8 @@ configMap:
         policy: one_factor
       - domain: 'status.6541333.xyz'
         policy: one_factor
+      - domain: 'hubble.apps.6541333.xyz'
+        policy: one_factor
 
   identity_validation:
     reset_password:
