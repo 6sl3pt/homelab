@@ -43,9 +43,21 @@ configMap:
         path: db-password
 
   notifier:
-    filesystem:
+    # filesystem:
+    #   enabled: true
+    #   filename: '/config/notification.txt'
+    smtp:
       enabled: true
-      filename: '/config/notification.txt'
+      address: 'smtp://msmtpd.msmtpd.svc.cluster.local:2500'
+      sender: 'Authelia <eochannelformal@gmail.com>'
+      startup_check_address: 'eochannelformal@gmail.com'
+      identifier: 'authelia'
+
+      # disabled as every is configured on msmtpd
+      disable_require_tls: true
+      disable_starttls: true
+      password:
+        disabled: true
 
   authentication_backend:
     password_reset:
