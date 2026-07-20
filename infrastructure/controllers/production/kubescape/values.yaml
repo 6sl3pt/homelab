@@ -5,6 +5,13 @@ capabilities:
   vulnerabilityScan: enable
   prometheusExporter: enable
 
+persistence:
+  storageClass: 'local-path'
+  accessMode: ReadWriteOnce
+  size:
+    backingStorage: 1Gi
+    kubevuln: 1Gi
+
 kubescape:
   serviceMonitor:
     enabled: true
@@ -18,13 +25,13 @@ kubescape:
 #     enable: true
 
 kubescapeScheduler:
-  scanSchedule: "0 0 * * *"
+  scanSchedule: '0 0 * * *'
   successfulJobsHistoryLimit: 1
 
 kubevulnScheduler:
-  scanSchedule: "0 0 * * *"
+  scanSchedule: '0 0 * * *'
   successfulJobsHistoryLimit: 1
 
 registryScanScheduler:
-  scanSchedule: "0 0 * * *"
+  scanSchedule: '0 0 * * *'
   successfulJobsHistoryLimit: 1
