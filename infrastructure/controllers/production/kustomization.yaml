@@ -9,5 +9,4 @@ resources:
   - local-path
   - reloader
   - postfix
-  - authelia
   - kubescape
