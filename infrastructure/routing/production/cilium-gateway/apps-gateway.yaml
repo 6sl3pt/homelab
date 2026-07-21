@@ -72,3 +72,21 @@ spec:
               kubernetes.io/metadata.name: its-mytabs
         kinds:
           - kind: HTTPRoute
+
+    - name: open-webui
+      protocol: HTTPS
+      port: 443
+      hostname: ai.apps.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: open-webui-apps-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: open-webui
+        kinds:
+          - kind: HTTPRoute
