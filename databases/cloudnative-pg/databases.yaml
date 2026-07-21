@@ -43,3 +43,16 @@ spec:
     name: cnpg-db-production-v1
   name: authelia
   owner: authelia
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: cnpg-db-production-v1-open-webui
+  namespace: cloudnative-pg
+spec:
+  cluster:
+    name: cnpg-db-production-v1
+  name: openwebui
+  owner: openwebui
+  extensions:
+    - name: vector
