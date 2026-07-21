@@ -147,6 +147,25 @@ configMap:
             - 'code'
           grant_types:
             - 'authorization_code'
+        - client_id: 'openwebui'
+          client_name: 'Open WebUI'
+          client_secret:
+            path: '/config/secrets/authelia-secrets/openwebui-secret'
+          public: false
+          require_pkce: true
+          pkce_challenge_method: 'S256'
+          authorization_policy: 'one_factor'
+          redirect_uris:
+            - 'https://ai.apps.6541333.xyz/oauth/oidc/callback'
+          scopes:
+            - 'openid'
+            - 'profile'
+            - 'email'
+            - 'groups'
+          response_types:
+            - 'code'
+          grant_types:
+            - 'authorization_code'
 
 pod:
   kind: 'Deployment'
