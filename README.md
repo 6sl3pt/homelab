@@ -4,7 +4,8 @@
 
 This repository contains the configuration and documentation of my homelab environment.
 
-The primary goal of this homelab is both educational and recreational. Lately, I’ve been exploring Kubernetes, and there’s no better way to learn than by running a cluster at home. Additionally, self-hosting applications allows me to take full ownership of the deployment and maintenance process from start to finish.
+The primary goal of this homelab is both educational and recreational. Lately, I’ve been exploring Kubernetes, and there’s no better way to learn than by running a cluster at home.
+Additionally, self-hosting applications allows me to take full ownership of the deployment and maintenance process from start to finish.
 
 ## ⚙️ Operation System
 
@@ -24,56 +25,68 @@ I use a refurbished second-hand mini pc. They're great because they are small an
 
 ## 📁 Project Structure
 
-This project is organized into two primary domains:
+This project is organized into 4 primary domains:
 
-- Applications — End-user applications.
-- Databases — Database and state management resources.
-
-Each domain has its own controllers and configurations, all organized under `infrastructure` folder.
+- Applications:Shared platform services and end-user applications.
+- Databases: Database and state management resources.
+- Infrastructure: Core cluster resources, network routing, and system controllers.
+- Monitoring: Observability tools, metrics collection, alert rules, and dashboards.
 
 ```bash
 ├── apps
+│   ├── platform    # Shared platform services (e.g., Authelia)
+│   └── workloads   # Core business application services
 ├── databases
-├── clusters # FluxCD bootstrap manifest
-├── infrastructure # Infrastructure for `apps` and `databases`
-│   ├── configs # Depends on infrastructure controllers
+├── clusters        # FluxCD bootstrap manifest
+├── infrastructure  # Low-level cluster resource
+│   ├── configs
 │   └── controllers
-└── monitoring # Monitoring tools for `apps` and `databases`
-    ├── configs # Depends on monitoring controllers
+└── monitoring      # Observability stack
+    ├── configs
     └── controllers
 ```
 
-**Future Roadmap:**
-The plan is to decouple the data layer from the application, 
-which will involve establishing two separate clusters,
-one dedicated to data and the other to application services for improved scalability.
+## 🔄 FluxCD Dependency Apply Order
 
-The diagram below outlines the planned changes to the folder structure:
+The diagram below illustrates the mandatory boot-sequence order (`dependsOn`) for manifests in this repository to prevent race conditions during cluster deployment.
 
-```bash
-├── apps
-├── databases
-├── clusters
-│   ├── data # Reconciles changes for `databases` and `infrastructure/**/data`
-│   └── production # Reconciles changes for `apps` and `infrastructure/**/production`
-├── infrastructure
-│   ├── configs
-│   │   ├── base # Base configuration
-│   │   ├── data # Config for `databases` infrastructure
-│   │   └── production # Config for `apps` infrastructure
-│   └── controllers
-│       ├── base # Base controller manifest
-│       ├── data # Controller for `databases` infrastructure
-│       └── production # Controller for `apps` infrastructure
-└── monitoring
-    ├── configs
-    │   ├── base # Base configuration
-    │   ├── data # Config for `databases` monitor tools
-    │   └── production # Config for `apps` monitor tools
-    └── controllers
-        ├── base # Base controller manifest
-        ├── data # Controller for `databases` monitor tools
-        └── production # Controller for `apps` monitor tools
+```mermaid
+flowchart TD
+    subgraph Infra["1. Infrastructure Layer"]
+        ic["Controllers"]
+        icf["Configs"]
+        icr["Routing"]
+    end
+
+
+    subgraph Data["2. State Layer"]
+        db[("Databases")]
+    end
+
+    subgraph Obs["3. Observability Layer"]
+        mc["Monitoring Controllers"]
+        mcf["Monitoring Configs"]
+    end
+
+    subgraph App["4. Application Layer"]
+        ap["Platform Services"]
+        aw["Core Workloads"]
+    end
+
+    %% Infrastructure dependencies
+    ic --> icf
+    icf --> icr
+
+    %% Cross-domain dependencies
+    icf --> db
+    icf --> mc
+    mc  --> mcf
+
+    %% Application dependencies
+    icr --> ap
+
+    db  --> ap
+    ap  --> aw
 ```
 
 ## 🔐 Secret Management
@@ -86,6 +99,7 @@ The diagram below outlines the planned changes to the folder structure:
 I decided to use [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault) and inject them into cluster with [External Secrets Operator](https://external-secrets.io/).
 
 **Why use a cloud secret provider instead of self-hosted?**
+
 - This approach improves reliability, resilience, and simplifies maintenance
 - In a GitOps setup (using FluxCD), `dependsOn` only ensures resources are applied, not that they are fully initialized or ready to use
 - Secret managers may exist in the cluster but still be unavailable when dependent services start
@@ -102,9 +116,10 @@ I decided to use [Azure Key Vault](https://azure.microsoft.com/en-us/products/ke
     <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/cloudflare-zero-trust.png" height="50"/>
 </div>
 
-I use a [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) integrated with [Cloudflare Zero Trust](https://developers.cloudflare.com/cloudflare-one/) to expose services, instead of the more traditional Ingress + VPN setup. 
+I use a [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) integrated with [Cloudflare Zero Trust](https://developers.cloudflare.com/cloudflare-one/) to expose services, instead of the more traditional Ingress + VPN setup.
 
 **Why Cloudflare Tunnel?**
+
 - I want to keep things simple and secure
 - No need for public IP addresses, firewall rule, or complex ingress config
 - Cluster is never directly exposed to the internet
@@ -124,6 +139,22 @@ I use a [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/con
 - Use [cert-manager](https://cert-manager.io/docs/) for TLS management
 - Integrate cert-manager with [Let’s Encrypt](https://letsencrypt.org/) for automated certificate provisioning
 - Use [ExternalDNS](https://kubernetes-sigs.github.io/external-dns/) to propagate domain records to local IP
+- Expose internal services via [Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway/), enforcing authentication per route using `ext_authz` filters integrated with Authelia
+
+### Identity Provider (IdP)
+
+<div style="display: flex; gap: 10px; align-items: center">
+    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/authelia.png" height="50"/>
+</div>
+
+I use [Authelia](https://www.authelia.com/) as a central authentication and authorization server to manage identity and access control natively within the cluster.
+
+**Why Self-hosted IdP?**
+
+- **Local Service Authentication:** Many applications lack built-in authentication. A self-hosted IdP allows me to intercept traffic and enforce authentication directly at the Gateway level before requests reach the app.
+- **Prevents Session Pollution:** External providers (like Google) tie cluster logins to global browser sessions, polluting main browsing profiles and interfering with personal services like Google Search.
+- **Incognito-Friendly:** Since I heavily use incognito windows, relying on external IdPs creates endless re-authentication loops. A self-hosted IdP keeps session lifecycles simple, predictable, and isolated.
+- **Centralized Identity:** Fully controls users, authentication policies, and app permissions in one place without depending on external cloud providers.
 
 ## 💾 Backup
 
@@ -135,7 +166,6 @@ I use a [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/con
 - I use [CloudNativePG (CNPG)](https://cloudnative-pg.io/), a Kubernetes-native operator for managing PostgreSQL clusters.
 - It includes native support for backup and restore operations via object storage.
 - Backups are stored in [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/).
-
 
 ## 🔭 Monitoring
 
