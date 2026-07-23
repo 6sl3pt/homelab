@@ -47,6 +47,17 @@ spec:
 apiVersion: postgresql.cnpg.io/v1
 kind: Database
 metadata:
+  name: cnpg-db-production-v1-litellm
+  namespace: cloudnative-pg
+spec:
+  cluster:
+    name: cnpg-db-production-v1
+  name: litellm
+  owner: litellm
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
   name: cnpg-db-production-v1-open-webui
   namespace: cloudnative-pg
 spec:

@@ -83,6 +83,11 @@ spec:
         superuser: false
         passwordSecret:
           name: authelia-db-creds
+      - name: litellm
+        login: true
+        superuser: false
+        passwordSecret:
+          name: litellm-db-creds
       - name: openwebui
         login: true
         superuser: false
