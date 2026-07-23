@@ -4,5 +4,5 @@ namespace: stirling-pdf
 resources:
   - configmap.yaml
   - ../../base/stirling-pdf/
-  - ../../base/cloudflared/
+  - ../../../common/cloudflared/
   - cloudflare.yaml

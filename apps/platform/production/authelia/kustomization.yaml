@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: authelia
 resources:
   - ../../base/authelia
-  - ../../base/cloudflared
+  - ../../../common/cloudflared/
   - secrets.yaml
   - users.yaml
   - cloudflare.yaml
