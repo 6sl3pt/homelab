@@ -4,7 +4,7 @@ metadata:
   name: adguard-home
   namespace: adguard
   annotations:
-    secret.reloader.stakater.com/reload: "adguard-tls-cert"
+    secret.reloader.stakater.com/reload: 'adguard-tls-cert'
 spec:
   serviceName: adguard-api
   replicas: 2
@@ -32,10 +32,10 @@ spec:
           imagePullPolicy: IfNotPresent
 
           envFrom:
-          - configMapRef:
-              name: rclone-config
-          - secretRef:
-              name: rclone-container-env
+            - configMapRef:
+                name: rclone-config
+            - secretRef:
+                name: rclone-container-env
 
           command:
             - sh
@@ -69,145 +69,145 @@ spec:
 
           resources:
             requests:
-              cpu: 5m
-              memory: 16Mi
-            limits:
               cpu: 50m
-              memory: 32Mi
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
 
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
                 matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - adguard-home
-              topologyKey: "kubernetes.io/hostname" # Ensure 1 pod per node
+                  - key: app
+                    operator: In
+                    values:
+                      - adguard-home
+              topologyKey: 'kubernetes.io/hostname' # Ensure 1 pod per node
 
       containers:
-      - name: adguard-home
-        image: adguard/adguardhome:v0.107.77
-        imagePullPolicy: IfNotPresent
+        - name: adguard-home
+          image: adguard/adguardhome:v0.107.77
+          imagePullPolicy: IfNotPresent
 
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            add:
-              - NET_BIND_SERVICE
-            drop:
-              - ALL
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add:
+                - NET_BIND_SERVICE
+              drop:
+                - ALL
 
-        ports:
-        - containerPort: 53
-          name: dns-tcp
-          protocol: TCP
-        - containerPort: 53
-          name: dns-udp
-          protocol: UDP
-        - containerPort: 443
-          name: https
-          protocol: TCP
-        - containerPort: 853
-          name: dns-tls
-          protocol: TCP
-        - containerPort: 5380
-          name: http
-          protocol: TCP
+          ports:
+            - containerPort: 53
+              name: dns-tcp
+              protocol: TCP
+            - containerPort: 53
+              name: dns-udp
+              protocol: UDP
+            - containerPort: 443
+              name: https
+              protocol: TCP
+            - containerPort: 853
+              name: dns-tls
+              protocol: TCP
+            - containerPort: 5380
+              name: http
+              protocol: TCP
 
-        livenessProbe:
-          tcpSocket:
-            port: 5380
-          initialDelaySeconds: 30
-          periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5380
+            initialDelaySeconds: 30
+            periodSeconds: 10
 
-        readinessProbe:
-          tcpSocket:
-            port: 443
-          initialDelaySeconds: 5
-          periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 443
+            initialDelaySeconds: 5
+            periodSeconds: 10
 
-        volumeMounts:
-        - name: adguard-data
-          mountPath: /opt/adguardhome/work/
-        - name: adguard-config
-          mountPath: /opt/adguardhome/conf/
-        - name: tls-certs
-          mountPath: /opt/adguardhome/ssl/
-          readOnly: true
+          volumeMounts:
+            - name: adguard-data
+              mountPath: /opt/adguardhome/work/
+            - name: adguard-config
+              mountPath: /opt/adguardhome/conf/
+            - name: tls-certs
+              mountPath: /opt/adguardhome/ssl/
+              readOnly: true
 
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+          resources:
+            requests:
+              memory: '128Mi'
+              cpu: '100m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
 
-      # rclone sidecar for config backup
-      - name: adguard-r2-sync
-        image: rclone/rclone:1.74
-        imagePullPolicy: IfNotPresent
+        # rclone sidecar for config backup
+        - name: adguard-r2-sync
+          image: rclone/rclone:1.74
+          imagePullPolicy: IfNotPresent
 
-        envFrom:
-        - configMapRef:
-            name: rclone-config
-        - secretRef:
-            name: rclone-container-env
+          envFrom:
+            - configMapRef:
+                name: rclone-config
+            - secretRef:
+                name: rclone-container-env
 
-        command:
-          - "sh"
-          - "-c"
-          - |
-            CONFIG_PATH="/opt/adguardhome/conf"
-            LAST_HASH=""
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              CONFIG_PATH="/opt/adguardhome/conf"
+              LAST_HASH=""
 
-            echo "$(date +"%Y-%m-%d %H:%M:%S") Sidecar started. Monitoring $CONFIG_PATH..."
+              echo "$(date +"%Y-%m-%d %H:%M:%S") Sidecar started. Monitoring $CONFIG_PATH..."
 
-            while true; do
-              CURRENT_HASH=$(ls -lR "$CONFIG_PATH" | md5sum | awk '{print $1}')
+              while true; do
+                CURRENT_HASH=$(ls -lR "$CONFIG_PATH" | md5sum | awk '{print $1}')
 
-              if [ -z "$LAST_HASH" ]; then
-                LAST_HASH="$CURRENT_HASH"
-                echo "$(date +"%Y-%m-%d %H:%M:%S") Initial hash set: $LAST_HASH. Monitoring for changes..."
-              elif [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
-                echo "$(date +"%Y-%m-%d %H:%M:%S") CHANGE DETECTED (New Hash: $CURRENT_HASH)"
-                echo "$(date +"%Y-%m-%d %H:%M:%S") Waiting 5 minutes for writes to stabilize..."
-                
-                LAST_HASH="$CURRENT_HASH"
-                sleep 300
+                if [ -z "$LAST_HASH" ]; then
+                  LAST_HASH="$CURRENT_HASH"
+                  echo "$(date +"%Y-%m-%d %H:%M:%S") Initial hash set: $LAST_HASH. Monitoring for changes..."
+                elif [ "$CURRENT_HASH" != "$LAST_HASH" ]; then
+                  echo "$(date +"%Y-%m-%d %H:%M:%S") CHANGE DETECTED (New Hash: $CURRENT_HASH)"
+                  echo "$(date +"%Y-%m-%d %H:%M:%S") Waiting 5 minutes for writes to stabilize..."
+                  
+                  LAST_HASH="$CURRENT_HASH"
+                  sleep 300
 
-                echo "$(date +"%Y-%m-%d %H:%M:%S") Starting rclone sync..."
-                if rclone sync "$CONFIG_PATH" crypt: --update --size-only --use-server-modtime --transfers 1; then
-                   echo "$(date +"%Y-%m-%d %H:%M:%S") Sync successful. Resuming monitor."
-                else
-                   echo "$(date +"%Y-%m-%d %H:%M:%S") ERROR: Sync failed. Will retry on next check."
+                  echo "$(date +"%Y-%m-%d %H:%M:%S") Starting rclone sync..."
+                  if rclone sync "$CONFIG_PATH" crypt: --update --size-only --use-server-modtime --transfers 1; then
+                     echo "$(date +"%Y-%m-%d %H:%M:%S") Sync successful. Resuming monitor."
+                  else
+                     echo "$(date +"%Y-%m-%d %H:%M:%S") ERROR: Sync failed. Will retry on next check."
+                  fi
                 fi
-              fi
 
-              # 4. Idle wait (adjust frequency here)
-              sleep 60
-            done
+                # 4. Idle wait (adjust frequency here)
+                sleep 60
+              done
 
-        securityContext:
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
-        volumeMounts:
-        - name: adguard-config
-          mountPath: /opt/adguardhome/conf/
-          readOnly: true
+          volumeMounts:
+            - name: adguard-config
+              mountPath: /opt/adguardhome/conf/
+              readOnly: true
 
-        resources:
-          requests:
-            cpu: 2m
-            memory: 16Mi
-          limits:
-            cpu: 20m
-            memory: 64Mi
+          resources:
+            requests:
+              cpu: 2m
+              memory: 16Mi
+            limits:
+              cpu: 20m
+              memory: 64Mi
 
       volumes:
         - name: tls-certs
@@ -215,20 +215,20 @@ spec:
             secretName: adguard-tls-cert
 
   volumeClaimTemplates:
-  - metadata:
-      name: adguard-data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 1Gi
-      storageClassName: "local-path"
+    - metadata:
+        name: adguard-data
+      spec:
+        accessModes: ['ReadWriteOnce']
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: 'local-path'
 
-  - metadata:
-      name: adguard-config
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 1Gi
-      storageClassName: "local-path"
+    - metadata:
+        name: adguard-config
+      spec:
+        accessModes: ['ReadWriteOnce']
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: 'local-path'

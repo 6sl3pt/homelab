@@ -12,20 +12,91 @@ spec:
     metadata:
       labels:
         app: its-mytabs
-        try: "0"
-        policy-type: "app"
-
+        try: '0'
+        policy-type: 'app'
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: 'Always'
+        seccompProfile:
+          type: RuntimeDefault
+
+      initContainers:
+        - name: pull-config
+          image: rclone/rclone:1.74
+          imagePullPolicy: IfNotPresent
+
+          envFrom:
+            - configMapRef:
+                name: rclone-config
+            - secretRef:
+                name: rclone-container-env
+
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+
+              DATA_DIR="/app/data"
+
+              if [ -d "$DATA_DIR" ] && [ -n "$(ls -A "$DATA_DIR/tabs" 2>/dev/null | grep -v "^1$")" ]; then
+                echo "Files already exist in $DATA_DIR. Skipping restore."
+              else
+                echo "Local volume is empty. Checking remote crypt: for existing files..."
+
+                if [ -z "$(rclone lsf crypt: --max-depth 1)" ]; then
+                  echo "CRITICAL: Remote 'crypt:' is empty or unreachable. Failing pod start."
+                  exit 1
+                fi
+
+                echo "Files found on remote. Syncing remote 'crypt:' to $DATA_DIR/..."
+                rclone sync crypt: "$DATA_DIR/" \
+                  --verbose \
+                  --use-server-modtime \
+                  --transfers=4
+              fi
+
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+          volumeMounts:
+            - mountPath: /app/data/
+              name: its-mytabs-data
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
       containers:
         - name: its-mytabs
           image: louislam/its-mytabs:1.6.2
 
+          command: ['deno', 'task', 'start']
+
           securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
             allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
 
           env:
             - name: MYTABS_LAUNCH_BROWSER
-              value: "false"
+              value: 'false'
 
           ports:
             - containerPort: 47777
@@ -37,11 +108,11 @@ spec:
 
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "50m"
+              memory: '128Mi'
+              cpu: '50m'
             limits:
-              memory: "256Mi"
-              cpu: "200m"
+              memory: '256Mi'
+              cpu: '200m'
 
       restartPolicy: Always
 
@@ -49,4 +120,3 @@ spec:
         - name: its-mytabs-data
           persistentVolumeClaim:
             claimName: its-mytabs-data
-

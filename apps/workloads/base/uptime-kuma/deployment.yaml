@@ -13,23 +13,87 @@ spec:
     metadata:
       labels:
         app: uptime-kuma
-        try: "0"
-        policy-type: "app"
+        try: '0'
+        policy-type: 'app'
 
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: 'Always'
+        seccompProfile:
+          type: RuntimeDefault
+
+      initContainers:
+        - name: pull-config
+          image: rclone/rclone:1.74
+          imagePullPolicy: IfNotPresent
+
+          envFrom:
+            - configMapRef:
+                name: rclone-config
+            - secretRef:
+                name: rclone-container-env
+
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+
+              DATA_DIR="/app/data"
+              DB_FILE="$DATA_DIR/kuma.db"
+
+              if [ -f "$DB_FILE" ]; then
+                echo "Database $DB_FILE already exists locally. Skipping restore."
+              else
+                echo "Local database not found. Checking remote crypt: for existing files..."
+
+                if [ -z "$(rclone lsf crypt: --max-depth 1)" ]; then
+                  echo "CRITICAL: Remote 'crypt:' is empty or unreachable. Failing pod start."
+                  exit 1
+                fi
+
+                echo "Files found on remote. Syncing remote 'crypt:' to $DATA_DIR/..."
+                rclone sync crypt: "$DATA_DIR/" \
+                  --verbose \
+                  --use-server-modtime \
+                  --transfers=4
+              fi
+
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+          volumeMounts:
+            - mountPath: /app/data
+              name: uptime-kuma-data
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
       containers:
         - name: uptime-kuma
           image: louislam/uptime-kuma:2.4.0
 
           securityContext:
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
             runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
                 - ALL
-            seccompProfile:
-              type: RuntimeDefault
 
           envFrom:
             - secretRef:
@@ -45,11 +109,11 @@ spec:
 
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: '256Mi'
+              cpu: '100m'
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: '512Mi'
+              cpu: '500m'
 
       restartPolicy: Always
 
@@ -57,4 +121,3 @@ spec:
         - name: uptime-kuma-data
           persistentVolumeClaim:
             claimName: uptime-kuma-data
-
