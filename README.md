@@ -34,6 +34,7 @@ This project is organized into 4 primary domains:
 
 ```bash
 ├── apps
+│   ├── common      # Common manifests shared across multiple services
 │   ├── platform    # Shared platform services (e.g., Authelia)
 │   └── workloads   # Core business application services
 ├── databases
@@ -57,7 +58,6 @@ flowchart TD
         icf["Configs"]
         icr["Routing"]
     end
-
 
     subgraph Data["2. State Layer"]
         db[("Databases")]
@@ -158,6 +158,8 @@ I use [Authelia](https://www.authelia.com/) as a central authentication and auth
 
 ## 💾 Backup
 
+### Database
+
 <div style="display: flex; gap: 10px; align-items: center">
     <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/cloudflare.png" height="30"/>
     <img src="https://cloudnative-pg.io/images/hero_image.svg" height="50"/>
@@ -166,6 +168,16 @@ I use [Authelia](https://www.authelia.com/) as a central authentication and auth
 - I use [CloudNativePG (CNPG)](https://cloudnative-pg.io/), a Kubernetes-native operator for managing PostgreSQL clusters.
 - It includes native support for backup and restore operations via object storage.
 - Backups are stored in [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/).
+
+### Persistent Storage
+
+<div style="display: flex; gap: 10px; align-items: center">
+    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/cloudflare.png" height="30"/>
+    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/rclone.png" height="50"/>
+</div>
+
+- I use [rclone](https://rclone.org/) with Kubernetes CronJob to periodically back up volume to Cloudflare R2.
+- I use an `initContainer` checks the local storage on startup and syncs down from R2 before the app spins up
 
 ## 🔭 Monitoring
 
