@@ -4,7 +4,7 @@ metadata:
   name: uptime-kuma-rclone-scheduler
   namespace: uptime-kuma
 spec:
-  schedule: "0 0 * * *"
+  schedule: '0 0 * * *'
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -14,42 +14,45 @@ spec:
       template:
         spec:
           containers:
-          - name: rclone
-            image: rclone/rclone:1.74
+            - name: rclone
+              image: rclone/rclone:1.74
 
-            envFrom:
-            - configMapRef:
-                name: rclone-config
-            - secretRef:
-                name: rclone-container-env
+              envFrom:
+                - configMapRef:
+                    name: rclone-config
+                - secretRef:
+                    name: rclone-container-env
 
-            command: ["rclone"]
-            args:
-              - sync
-              - /app/data/
-              - "crypt:"
-              - "--update"
-              - "--size-only"
-              - "--use-server-modtime"
-              - "--transfers=4"
+              command: ['rclone']
+              args:
+                - sync
+                - /app/data/
+                - 'crypt:'
+                - '--update'
+                - '--size-only'
+                - '--use-server-modtime'
+                - '--transfers=4'
+                - '--exclude=kuma.db-wal'
+                - '--exclude=kuma.db-shm'
+                - '--exclude=*.db-journal'
 
-            securityContext:
-              allowPrivilegeEscalation: false
-              runAsNonRoot: true
-              runAsUser: 1000
-              capabilities:
-                drop:
-                  - ALL
-              seccompProfile:
-                type: RuntimeDefault
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                runAsUser: 1000
+                capabilities:
+                  drop:
+                    - ALL
+                seccompProfile:
+                  type: RuntimeDefault
 
-            volumeMounts:
-            - name: uptime-kuma-data
-              mountPath: /app/data/
+              volumeMounts:
+                - name: uptime-kuma-data
+                  mountPath: /app/data/
 
           restartPolicy: OnFailure
 
           volumes:
-          - name: uptime-kuma-data
-            persistentVolumeClaim:
-              claimName: uptime-kuma-data
+            - name: uptime-kuma-data
+              persistentVolumeClaim:
+                claimName: uptime-kuma-data
