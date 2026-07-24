@@ -1,0 +1,299 @@
+masterKey:
+  secretName: litellm-secrets
+  secretKey: master-key
+
+database:
+  writer:
+    host: 'cnpg.db.6541333.xyz'
+    port: 5432
+    dbname: 'litellm'
+    passwordSecret:
+      name: litellm-db-creds
+      usernameKey: username
+      passwordKey: password
+
+# disable redis
+redis:
+  cluster: false
+  host: ''
+
+gateway:
+  enabled: true
+  numWorkers: 1
+
+  config:
+    create: true
+    proxy_config:
+      general_settings:
+        proxy_batch_write_at: 300
+        store_model_in_db: false
+        database_connection_pool_limit: 10
+        disable_error_logs: true
+        ui_access_mode: 'admin_only'
+        auto_redirect_ui_login_to_sso: true
+        # enable_jwt_auth: true
+
+      litellm_settings:
+        cache: false
+        request_timeout: 600
+        set_verbose: false
+        json_logs: true
+
+      litellm_jwtauth:
+        user_id_jwt_field: 'sub'
+        user_email_jwt_field: 'email'
+        user_id_upsert: true
+
+      model_list:
+        - model_name: code/claude-haiku-4-5
+          litellm_params:
+            model: openai/claude-haiku-4-5
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0
+            output_cost_per_token: 0
+
+        - model_name: code/claude-opus-4-6
+          litellm_params:
+            model: openai/claude-opus-4-6
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000005
+            output_cost_per_token: 0.000025
+            cache_read_input_token_cost: 0.0000005
+            cache_creation_input_token_cost: 0.00000625
+            cache_creation_input_token_cost_above_1hr: 0.00001
+
+        - model_name: code/claude-opus-4-7
+          litellm_params:
+            model: openai/claude-opus-4-7
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000005
+            output_cost_per_token: 0.000025
+            cache_read_input_token_cost: 0.0000005
+            cache_creation_input_token_cost: 0.00000625
+            cache_creation_input_token_cost_above_1hr: 0.00001
+
+        - model_name: code/claude-opus-4-8
+          litellm_params:
+            model: openai/claude-opus-4-8
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000005
+            output_cost_per_token: 0.000025
+            cache_read_input_token_cost: 0.0000005
+            cache_creation_input_token_cost: 0.00000625
+            cache_creation_input_token_cost_above_1hr: 0.00001
+
+        - model_name: code/claude-sonnet-4-5
+          litellm_params:
+            model: openai/claude-sonnet-4-5
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000003
+            output_cost_per_token: 0.000015
+            cache_read_input_token_cost: 0.0000003
+            cache_creation_input_token_cost: 0.00000375
+            cache_creation_input_token_cost_above_1hr: 0.000006
+
+        - model_name: code/claude-sonnet-4-6
+          litellm_params:
+            model: openai/claude-sonnet-4-6
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000003
+            output_cost_per_token: 0.000015
+            cache_read_input_token_cost: 0.0000003
+            cache_creation_input_token_cost: 0.00000375
+            cache_creation_input_token_cost_above_1hr: 0.000006
+
+        - model_name: code/claude-sonnet-5
+          litellm_params:
+            model: openai/claude-sonnet-5
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000003
+            output_cost_per_token: 0.000015
+            cache_read_input_token_cost: 0.0000003
+            cache_creation_input_token_cost: 0.00000375
+            cache_creation_input_token_cost_above_1hr: 0.000006
+
+        - model_name: code/gpt-4o
+          litellm_params:
+            model: openai/gpt-4o
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.0000025
+            output_cost_per_token: 0.00001
+            cache_read_input_token_cost: 0.00000125
+
+        - model_name: code/gpt-5.1-chat-gus
+          litellm_params:
+            model: openai/gpt-5.1-chat-gus
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.00000125
+            output_cost_per_token: 0.00001
+            cache_read_input_token_cost: 0.000000125
+
+        - model_name: code/gpt-5.4-gus
+          litellm_params:
+            model: openai/gpt-5.4-gus
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.0000025
+            output_cost_per_token: 0.000015
+            cache_read_input_token_cost: 0.00000025
+            input_cost_per_token_above_272k_tokens: 0.000005
+            output_cost_per_token_above_272k_tokens: 0.0000225
+            cache_read_input_token_cost_above_272k_token: 0.0000005
+
+        - model_name: code/gpt-5.5-gus
+          litellm_params:
+            model: openai/gpt-5.5-gus
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000005
+            output_cost_per_token: 0.00003
+            cache_read_input_token_cost: 0.0000005
+            input_cost_per_token_above_272k_tokens: 0.00001
+            output_cost_per_token_above_272k_tokens: 0.000045
+            cache_read_input_token_cost_above_272k_token: 0.000001
+
+        - model_name: code/gpt-5.6-luna-dzus
+          litellm_params:
+            model: openai/gpt-5.6-luna-dzus
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000001
+            output_cost_per_token: 0.000006
+            cache_read_input_token_cost: 0.0000001
+            cache_creation_input_token_cost: 0.00000125
+            input_cost_per_token_above_272k_tokens: 0.000002
+            output_cost_per_token_above_272k_tokens: 0.000009
+            cache_read_input_token_cost_above_272k_token: 0.0000002
+            cache_creation_input_token_cost_above_272k_tokens: 0.0000025
+
+        - model_name: code/gpt-5.6-terra-dzus
+          litellm_params:
+            model: openai/gpt-5.terra-dzus
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.0000025
+            output_cost_per_token: 0.000015
+            cache_read_input_token_cost: 0.00000025
+            cache_creation_input_token_cost: 0.000003125
+            input_cost_per_token_above_272k_tokens: 0.000005
+            output_cost_per_token_above_272k_tokens: 0.0000225
+            cache_read_input_token_cost_above_272k_token: 0.0000005
+            cache_creation_input_token_cost_above_272k_tokens: 0.00000625
+
+        - model_name: code/gemini-3.1-pro-preview
+          litellm_params:
+            model: openai/gemini-3.1-pro-preview
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.000002
+            output_cost_per_token: 0.000012
+            cache_read_input_token_cost: 0.0000002
+            input_cost_per_token_above_200k_tokens: 0.000004
+            output_cost_per_token_above_200k_tokens: 0.000018
+
+        - model_name: code/gemini-3.5-flash
+          litellm_params:
+            model: openai/gemini-3.5-flash
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0.0000015
+            output_cost_per_token: 0.000009
+            cache_read_input_token_cost: 0.00000015
+
+        - model_name: code/gemma-4-26b-preview
+          litellm_params:
+            model: openai/gemma-4-26b-a4b-it
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0
+            output_cost_per_token: 0
+
+        - model_name: code/granite-4-small
+          litellm_params:
+            model: openai/ibm/granite-4-h-small
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0
+            output_cost_per_token: 0
+
+        - model_name: code/llama-4-maverick-17b-instruct
+          litellm_params:
+            model: openai/meta-llama/llama-4-maverick-17b-128e-instruct-fp8
+            api_base: os.environ/ICA_API_URL
+            api_key: os.environ/ICA_API_KEY
+          model_info:
+            input_cost_per_token: 0
+            output_cost_per_token: 0
+
+  resources:
+    requests:
+      cpu: '1'
+      memory: 500Mi
+    limits:
+      cpu: '2'
+      memory: 2Gi
+
+backend:
+  enabled: true
+  envSecrets:
+    - litellm-backend-env
+
+  # NOTE: waiting for JWT authentication to become free
+  # extraEnv:
+  #   - name: PROXY_BASE_URL
+  #     value: 'https://litellm.apps.6541333.xyz'
+  #   - name: JWT_PUBLIC_KEY_URL
+  #     value: 'https://auth.6541333.xyz/.well-known/openid-configuration/jwks'
+  #   - name: GENERIC_CLIENT_ID
+  #     value: 'litellm'
+  #   - name: GENERIC_AUTHORIZATION_ENDPOINT
+  #     value: 'https://auth.6541333.xyz/api/oidc/authorization'
+  #   - name: GENERIC_TOKEN_ENDPOINT
+  #     value: 'https://auth.6541333.xyz/api/oidc/token'
+  #   - name: GENERIC_USERINFO_ENDPOINT
+  #     value: 'https://auth.6541333.xyz/api/oidc/userinfo'
+  #   - name: GENERIC_CLIENT_USE_PKCE
+  #     value: 'true'
+  #   - name: GENERIC_SCOPE
+  #     value: 'openid profile email groups'
+  #   - name: GENERIC_ROLE_MAPPINGS_GROUP_CLAIM
+  #     value: 'groups'
+  #   - name: GENERIC_ROLE_MAPPINGS_ROLES
+  #     value: '{"proxy_admin":["admins"],"internal_user":["dev"]}'
+
+  resources:
+    requests:
+      cpu: '1'
+      memory: 500Mi
+    limits:
+      cpu: '2'
+      memory: 2Gi
+
+ui:
+  enabled: true

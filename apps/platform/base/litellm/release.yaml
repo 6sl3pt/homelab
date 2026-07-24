@@ -1,0 +1,15 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: litellm
+  namespace: litellm
+spec:
+  interval: 30m
+  chartRef:
+    kind: OCIRepository
+    name: litellm
+    namespace: litellm
+
+  valuesFrom:
+    - kind: ConfigMap
+      name: litellm-values
