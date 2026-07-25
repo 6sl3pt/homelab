@@ -88,7 +88,7 @@ spec:
 
       containers:
         - name: adguard-home
-          image: adguard/adguardhome:v0.107.77
+          image: adguard/adguardhome:v0.107.78
           imagePullPolicy: IfNotPresent
 
           securityContext:
