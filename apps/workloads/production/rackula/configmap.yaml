@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rackula-ui-config
+  namespace: rackula
+data:
+  API_HOST: '127.0.0.1'
+  API_PORT: '3001'
+  RACKULA_LISTEN_PORT: '8080'
+  RACKULA_AUTH_MODE: 'oidc'
+  RACKULA_BASE_URL: 'https://rackula.apps.6541333.xyz'
+  RACKULA_TRUST_PROXY: '1'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rackula-api-config
+  namespace: rackula
+data:
+  RACKULA_API_PORT: '3001'
+  RACKULA_BASE_URL: 'https://rackula.apps.6541333.xyz'
+  CORS_ORIGIN: 'https://rackula.apps.6541333.xyz'
+  RACKULA_AUTH_MODE: 'oidc'
+  RACKULA_OIDC_CLIENT_ID: 'rackula'
+  RACKULA_OIDC_ISSUER: 'https://auth.6541333.xyz'
+  RACKULA_OIDC_REDIRECT_URI: 'https://rackula.apps.6541333.xyz/auth/callback'
+  RACKULA_TRUST_PROXY: 'true'
+  RACKULA_AUTH_SESSION_COOKIE_SECURE: 'true'

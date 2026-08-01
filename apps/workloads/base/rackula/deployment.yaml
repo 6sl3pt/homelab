@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rackula
+  namespace: rackula
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rackula
+  template:
+    metadata:
+      labels:
+        app: rackula
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: rackula-ui
+          image: ghcr.io/rackulalives/rackula:v26.7.0-persist
+          imagePullPolicy: IfNotPresent
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '16Mi'
+            limits:
+              cpu: '500m'
+              memory: '128Mi'
+
+          envFrom:
+            - configMapRef:
+                name: rackula-ui-config
+            - secretRef:
+                name: rackula-ui-container-env
+          ports:
+            - containerPort: 8080
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+
+          volumeMounts:
+            - mountPath: /var/cache/nginx
+              name: tmp-nginx-cache
+            - mountPath: /var/run
+              name: tmp-nginx-run
+            - mountPath: /tmp
+              name: tmp-ui
+            - mountPath: /etc/nginx/conf.d
+              name: tmp-nginx-conf
+
+        - name: rackula-api
+          image: ghcr.io/rackulalives/rackula-api:26.7.0
+          imagePullPolicy: IfNotPresent
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          resources:
+            requests:
+              cpu: '50m'
+              memory: '64Mi'
+            limits:
+              cpu: '500m'
+              memory: '256Mi'
+
+          envFrom:
+            - configMapRef:
+                name: rackula-api-config
+            - secretRef:
+                name: rackula-api-container-env
+
+          ports:
+            - containerPort: 3001
+
+          volumeMounts:
+            - mountPath: /data
+              name: rackula-data
+            - mountPath: /tmp
+              name: tmp-api
+
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+      volumes:
+        - name: rackula-data
+          persistentVolumeClaim:
+            claimName: rackula-data
+        - name: tmp-nginx-cache
+          emptyDir: {}
+        - name: tmp-nginx-run
+          emptyDir: {}
+        - name: tmp-ui
+          emptyDir: {}
+        - name: tmp-nginx-conf
+          emptyDir: {}
+        - name: tmp-api
+          emptyDir: {}
