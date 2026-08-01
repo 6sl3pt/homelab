@@ -73,6 +73,24 @@ spec:
         kinds:
           - kind: HTTPRoute
 
+    - name: rackula
+      protocol: HTTPS
+      port: 443
+      hostname: rackula.apps.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: rackula-apps-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: rackula
+        kinds:
+          - kind: HTTPRoute
+
     - name: litellm-ui
       protocol: HTTPS
       port: 443
