@@ -83,6 +83,8 @@ configMap:
         policy: one_factor
       - domain: 'guitar.apps.6541333.xyz'
         policy: one_factor
+      - domain: 'rackula.apps.6541333.xyz'
+        policy: one_factor
 
       - domain: 'hubble.apps.6541333.xyz'
         policy: two_factor
@@ -126,6 +128,13 @@ configMap:
             - alt_emails
             - preferred_username
             - name
+        rackula:
+          id_token:
+            - email
+            - email_verified
+            - preferred_username
+            - name
+
       clients:
         - client_id: 'cloudflare'
           claims_policy: cloudflare
@@ -147,6 +156,27 @@ configMap:
             - 'code'
           grant_types:
             - 'authorization_code'
+
+        - client_id: 'rackula'
+          claims_policy: rackula
+          client_name: 'Rackula Rack Layout Designer'
+          client_secret:
+            path: '/config/secrets/authelia-secrets/rackula-secret'
+          public: false
+          require_pkce: false
+          authorization_policy: 'one_factor'
+          redirect_uris:
+            - 'https://rackula.apps.6541333.xyz/auth/callback'
+          scopes:
+            - 'openid'
+            - 'profile'
+            - 'email'
+          response_types:
+            - 'code'
+          grant_types:
+            - 'authorization_code'
+          client_auth_method: 'client_secret_basic'
+
         - client_id: 'openwebui'
           client_name: 'Open WebUI'
           client_secret:
