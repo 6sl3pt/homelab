@@ -14,6 +14,14 @@ spec:
     - matches:
         - path:
             type: PathPrefix
+            value: /healthz
+      backendRefs:
+        - name: kube-prometheus-stack-grafana
+          port: 80
+
+    - matches:
+        - path:
+            type: PathPrefix
             value: /
       filters:
         - type: RequestHeaderModifier
