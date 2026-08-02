@@ -96,6 +96,9 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: rackula-data
+            - mountPath: /app/src/auth/config.ts
+              name: rackula-auth-patch
+              subPath: config.ts
             - mountPath: /tmp
               name: tmp-api
 
@@ -116,6 +119,9 @@ spec:
         - name: rackula-data
           persistentVolumeClaim:
             claimName: rackula-data
+        - name: rackula-auth-patch
+          configMap:
+            name: rackula-auth-patch
         - name: tmp-nginx-cache
           emptyDir: {}
         - name: tmp-nginx-run

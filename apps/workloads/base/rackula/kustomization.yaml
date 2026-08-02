@@ -5,3 +5,8 @@ resources:
   - deployment.yaml
   - service.yaml
   - storage.yaml
+
+configMapGenerator:
+  - name: rackula-auth-patch
+    files:
+      - config.ts=patches/config.ts
