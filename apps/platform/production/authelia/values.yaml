@@ -175,7 +175,7 @@ configMap:
             - 'code'
           grant_types:
             - 'authorization_code'
-          client_auth_method: 'client_secret_basic'
+          token_endpoint_auth_method: 'client_secret_post'
 
         - client_id: 'openwebui'
           client_name: 'Open WebUI'
