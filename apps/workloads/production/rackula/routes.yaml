@@ -21,8 +21,6 @@ spec:
             set:
               - name: X-Forwarded-Proto
                 value: https
-              - name: X-Forwarded-Host
-                value: rackula.apps.6541333.xyz
       backendRefs:
         - name: rackula-ui
           port: 8080

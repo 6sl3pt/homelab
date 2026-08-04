@@ -10,6 +10,7 @@ data:
   RACKULA_AUTH_MODE: 'oidc'
   RACKULA_BASE_URL: 'https://rackula.apps.6541333.xyz'
   RACKULA_TRUST_PROXY: '1'
+  RACKULA_STORAGE_MODE: 'server'
 ---
 apiVersion: v1
 kind: ConfigMap

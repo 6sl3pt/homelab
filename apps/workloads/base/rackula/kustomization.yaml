@@ -10,3 +10,6 @@ configMapGenerator:
   - name: rackula-auth-patch
     files:
       - config.ts=patches/config.ts
+  - name: rackula-nginx-patch
+    files:
+      - patches.conf=patches/nginx-patches.conf

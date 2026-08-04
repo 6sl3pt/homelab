@@ -56,6 +56,9 @@ spec:
             periodSeconds: 10
 
           volumeMounts:
+            - mountPath: /etc/nginx/conf.d/patches.conf
+              name: rackula-nginx-patch
+              subPath: patches.conf
             - mountPath: /var/cache/nginx
               name: tmp-nginx-cache
             - mountPath: /var/run
@@ -122,6 +125,9 @@ spec:
         - name: rackula-auth-patch
           configMap:
             name: rackula-auth-patch
+        - name: rackula-nginx-patch
+          configMap:
+            name: rackula-nginx-patch
         - name: tmp-nginx-cache
           emptyDir: {}
         - name: tmp-nginx-run
