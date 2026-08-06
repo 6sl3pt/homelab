@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto-mqtt
+  namespace: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto-mqtt
+
+  template:
+    metadata:
+      labels:
+        app: mosquitto-mqtt
+        try: '0'
+        policy-type: 'app'
+
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      initContainers:
+        - name: generate-passwd-file
+          image: eclipse-mosquitto:2.1.1-alpine
+          command:
+            - 'sh'
+            - '-c'
+            - |
+              rm -f /mosquitto/config/passwd && \
+              mosquitto_passwd -c -b /mosquitto/config/passwd "mqtt_user" "${MQTT_PASSWORD}"
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+          envFrom:
+            - secretRef:
+                name: mosquitto-container-env
+
+          volumeMounts:
+            - name: mosquitto-config-dir
+              mountPath: /mosquitto/config
+
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto:2.1.1-alpine
+          command:
+            - 'mosquitto'
+            - '-c'
+            - '/mosquitto/config/mosquitto.conf'
+
+          env:
+            - name: MOSQUITTO_UNSAFE_ALLOW_SYMLINKS
+              value: '1'
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          ports:
+            - containerPort: 1883
+
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '64Mi'
+            limits:
+              cpu: '500m'
+              memory: '256Mi'
+
+          volumeMounts:
+            - name: mosquitto-config-file
+              mountPath: /mosquitto/config/mosquitto.conf
+              subPath: mosquitto.conf
+            - name: mosquitto-config-dir
+              mountPath: /mosquitto/config
+
+      volumes:
+        - name: mosquitto-config-file
+          configMap:
+            name: mosquitto-config
+        - name: mosquitto-config-dir
+          emptyDir: {}
+
+      restartPolicy: Always
