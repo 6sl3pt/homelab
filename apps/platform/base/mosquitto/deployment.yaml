@@ -26,7 +26,7 @@ spec:
 
       initContainers:
         - name: generate-passwd-file
-          image: eclipse-mosquitto:2.1.1-alpine
+          image: eclipse-mosquitto:2.1.2-alpine
           command:
             - 'sh'
             - '-c'
@@ -50,7 +50,7 @@ spec:
 
       containers:
         - name: mosquitto
-          image: eclipse-mosquitto:2.1.1-alpine
+          image: eclipse-mosquitto:2.1.2-alpine
           command:
             - 'mosquitto'
             - '-c'
