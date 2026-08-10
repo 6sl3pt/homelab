@@ -4,7 +4,7 @@
     "kubectl@1.36.2",
     "talosctl@1.13.5",
     "k9s@0.51.0",
-    "fluxcd@2.9.2",
+    "fluxcd@2.9.3",
     "authelia@4.39.20",
     "cloudflared@2026.7.2",
     "kubernetes-helm@4.2.3",
