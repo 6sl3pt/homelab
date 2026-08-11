@@ -91,6 +91,24 @@ spec:
         kinds:
           - kind: HTTPRoute
 
+    - name: zigbee2mqtt
+      protocol: HTTPS
+      port: 443
+      hostname: zigbee.apps.6541333.xyz
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: zigbee2mqtt-apps-tls
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              kubernetes.io/metadata.name: zigbee2mqtt
+        kinds:
+          - kind: HTTPRoute
+
     - name: litellm-ui
       protocol: HTTPS
       port: 443
