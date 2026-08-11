@@ -96,6 +96,11 @@ configMap:
         subject:
           - 'group:admins'
 
+      - domain: 'zigbee.apps.6541333.xyz'
+        policy: two_factor
+        subject:
+          - 'group:admins'
+
       - domain: 'pgadmin.db.6541333.xyz'
         policy: two_factor
         subject:
