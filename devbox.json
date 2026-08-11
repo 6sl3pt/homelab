@@ -6,7 +6,7 @@
     "k9s@0.51.0",
     "fluxcd@2.9.2",
     "authelia@4.39.20",
-    "cloudflared@2026.7.2",
+    "cloudflared@2026.7.3",
     "kubernetes-helm@4.2.3",
     "azure-cli@2.88.0"
   ],
