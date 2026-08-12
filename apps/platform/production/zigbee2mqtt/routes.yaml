@@ -1,0 +1,49 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: zigbee2mqtt
+  namespace: zigbee2mqtt
+spec:
+  parentRefs:
+    - name: apps-gateway
+      namespace: cilium-gateway
+      sectionName: zigbee2mqtt
+  hostnames:
+    - zigbee.apps.6541333.xyz
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
+        - type: RequestHeaderModifier
+          requestHeaderModifier:
+            set:
+              - name: X-Forwarded-Proto
+                value: https
+        - type: ExternalAuth
+          externalAuth:
+            protocol: HTTP
+            http:
+              path: /api/authz/ext-authz/
+              allowedHeaders:
+                - Cookie
+                - Accept
+                - X-Forwarded-Proto
+                - X-Forwarded-Host
+                - X-Forwarded-Uri
+                - X-Forwarded-Method
+              allowedResponseHeaders:
+                - Remote-User
+                - Remote-Groups
+
+            backendRef:
+              group: ''
+              kind: Service
+              name: authelia
+              namespace: authelia
+              port: 9091
+
+      backendRefs:
+        - name: zigbee2mqtt
+          port: 8080

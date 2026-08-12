@@ -4,3 +4,4 @@ resources:
   - authelia
   - litellm
   - mosquitto
+  - zigbee2mqtt

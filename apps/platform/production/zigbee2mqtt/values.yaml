@@ -1,0 +1,51 @@
+service:
+  type: ClusterIP
+  port: 8080
+
+secretesMigratorContainer:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    privileged: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+
+statefulset:
+  storage:
+    enabled: true
+    size: 1Gi
+    storageClassName: 'local-path'
+
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+    fsGroupChangePolicy: 'Always'
+    seccompProfile:
+      type: RuntimeDefault
+
+  securityContext:
+    privileged: false
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+      add: []
+
+zigbee2mqtt:
+  homeassistant:
+    enabled: true
+  permit_join: false
+  mqtt:
+    server: mqtt://mosquitto.mosquitto.svc.cluster.local:1883
+  serial:
+    port: tcp://10.134.20.30:2108
+    adapter: zstack
+  advanced:
+    channel: 25
+  frontend:
+    enabled: true
+    port: 8080
