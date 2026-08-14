@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.17.2/.schema/devbox.schema.json",
   "packages": [
     "kubectl@1.36.3",
-    "talosctl@1.13.7",
+    "talosctl@1.13.8",
     "k9s@0.51.0",
     "fluxcd@2.9.3",
     "authelia@4.39.20",
