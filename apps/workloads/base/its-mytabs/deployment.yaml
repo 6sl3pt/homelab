@@ -82,7 +82,7 @@ spec:
 
       containers:
         - name: its-mytabs
-          image: louislam/its-mytabs:1.6.2
+          image: louislam/its-mytabs:1.7.0
 
           command: ['deno', 'task', 'start']
 
