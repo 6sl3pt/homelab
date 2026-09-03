@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: its-mytabs
+  namespace: its-mytabs
 spec:
   replicas: 1
   selector:
@@ -97,6 +98,8 @@ spec:
           env:
             - name: MYTABS_LAUNCH_BROWSER
               value: 'false'
+            - name: DENO_DIR
+              value: '/app/data/.deno-dir'
 
           ports:
             - containerPort: 47777
