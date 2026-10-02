@@ -3,6 +3,7 @@ kind: ConfigMap
 metadata:
   name: commafeed-configmap
 data:
-  QUARKUS_DATASOURCE_DB_KIND: "postgresql"
-  QUARKUS_DATASOURCE_JDBC_URL: "jdbc:postgresql://cnpg.db.6541333.xyz:5432/commafeed"
-  QUARKUS_DATASOURCE_USERNAME: "commafeed"
+  QUARKUS_DATASOURCE_DB_KIND: 'postgresql'
+  QUARKUS_DATASOURCE_JDBC_URL: 'jdbc:postgresql://cnpg.db.6541333.xyz:5432/commafeed'
+  QUARKUS_DATASOURCE_USERNAME: 'commafeed'
+  COMMAFEED_DATABASE_CLEANUP_ENTRIES_MAX_AGE: '30D'
