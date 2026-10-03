@@ -91,79 +91,140 @@ flowchart TD
 
 ## 🔐 Secret Management
 
-<div style="display: flex; gap: 10px">
-    <img src="https://www.isjw.uk/images/azure/keyvault.png" height="50"/>
-    <img src="https://external-secrets.io/latest/pictures/eso-round-logo.svg" height="50">
-</div>
+```mermaid
+flowchart LR
+    subgraph "Kubernetes Cluster"
+        subgraph "External Secret Operator"
+            cs("ClusterSecretStore")
+        end
+        subgraph "Application"
+            cs --> es("ExternalSecret")
+            es --> sec("Secret")
+            sec --> pod("Pod")
+        end
+    end
+
+    subgraph "Azure"
+        kv("Azure Key Vault") --> cs
+    end
+```
 
 I decided to use [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault) and inject them into cluster with [External Secrets Operator](https://external-secrets.io/).
 
-**Why use a cloud secret provider instead of self-hosted?**
+**Why not self-hosted?**
 
-- This approach improves reliability, resilience, and simplifies maintenance
-- In a GitOps setup (using FluxCD), `dependsOn` only ensures resources are applied, not that they are fully initialized or ready to use
-- Secret managers may exist in the cluster but still be unavailable when dependent services start
-- A self-hosted secret manager can become a single point of failure
-- If the secret manager is unavailable, dependent services may fail to start or restart
-- Cloud secret providers decouple secret management from the cluster
+- Reliability, resilience, and simplifies maintenance
+- FluxCD `dependsOn` ensures resources are applied, not ready, so secret managers may be unavailable when dependent services start.
+- If it's is unavailable, dependent services may fail to start or restart
+- It can become a single point of failure
 
 ## 🌐 Service Exposing
 
 ### Publicly
 
-<div style="display: flex; gap: 10px; align-items: center">
-    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/cloudflare.png" height="30"/>
-    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/cloudflare-zero-trust.png" height="50"/>
-</div>
+```mermaid
+flowchart LR
+    user((" "))
 
-I use a [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) integrated with [Cloudflare Zero Trust](https://developers.cloudflare.com/cloudflare-one/) to expose services, instead of the more traditional Ingress + VPN setup.
+    subgraph "Cloudflare"
+        tunnel("Cloudflare Tunnel") -->|Authenticate| access("Cloudflare Access")
+    end
 
-**Why Cloudflare Tunnel?**
+    user --> tunnel
 
-- I want to keep things simple and secure
-- No need for public IP addresses, firewall rule, or complex ingress config
+    subgraph "Kubernetes Cluster"
+        subgraph "Authetication"
+            access --> cfd("cloudflared")
+            cfd --> auth("Authelia")
+        end
+        subgraph "Public Application"
+            tunnel --> cfd2("cloudflared")
+            cfd2 --> serv("Pod")
+        end
+    end
+```
+
+I use a [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) integrated with [Cloudflare Access](https://www.cloudflare.com/sase/products/access/) to expose services, instead of the more traditional Ingress + VPN setup.
+
+- Simple and secure
 - Cluster is never directly exposed to the internet
 - Only authorized users can access internal services
 - Lightweight solution with minimal operational overhead
 
 ### Locally
 
-<div style="display: flex; gap: 10px; align-items: center">
-    <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/cilium.svg" height="50"/>
-    <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/cert-manager.svg" height="50"/>
-    <img src="https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/lets-encrypt.svg" height="50"/>
-    <img src="https://raw.githubusercontent.com/kubernetes-sigs/external-dns/refs/heads/master/docs/img/external-dns.png" height="50"/>
-</div>
+```mermaid
+flowchart LR
+    user2((" ")) --> gw("Gateway API")
+    subgraph "Kubernetes Cluster"
+        subgraph "Local Application"
+            route("HTTPRoute") --> serv2("Pod")
+        end
+        subgraph "Authetication "
+            cfd3("cloudflared") --> auth2("Authelia")
+        end
+        gw --> route
+    end
+    subgraph "Cloudflare "
+        route -->|Authenticate| tunnel2("Cloudflare Tunnel")
+        tunnel2 --> cfd3
+    end
+```
 
-- Use [Cilium](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) as the Kubernetes CNI
-- Use [cert-manager](https://cert-manager.io/docs/) for TLS management
-- Integrate cert-manager with [Let’s Encrypt](https://letsencrypt.org/) for automated certificate provisioning
-- Use [ExternalDNS](https://kubernetes-sigs.github.io/external-dns/) to propagate domain records to local IP
-- Expose internal services via [Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway/), enforcing authentication per route using `ext_authz` filters integrated with Authelia
+I use [Cilium](https://docs.cilium.io/en/stable/network/servicemesh/ingress/) which is a great Kubernetes CNI with support for the [Gateway API](https://kubernetes.io/docs/concepts/services-networking/gateway/):
+
+- Expose internal services through the Gateway API
+- Enforce per-route authentication using `ext_authz` on HTTPRoute with Authelia.
+
+The Gateway API also integrates seamlessly with:
+
+- [cert-manager](https://cert-manager.io/docs/) and [Let’s Encrypt](https://letsencrypt.org/) for automated TLS management
+- [ExternalDNS](https://kubernetes-sigs.github.io/external-dns/) for propagating DNS records to local IP
 
 ### Identity Provider (IdP)
 
-<div style="display: flex; gap: 10px; align-items: center">
-    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/authelia.png" height="50"/>
-</div>
+I use [Authelia](https://www.authelia.com/) to manage identity and access control natively within the cluster.
 
-I use [Authelia](https://www.authelia.com/) as a central authentication and authorization server to manage identity and access control natively within the cluster.
+**Why self-hosted IdP?**
 
-**Why Self-hosted IdP?**
+For simple use cases, using an external provider (such as Google) is an easy way to integrate with Cloudflare Access. However, for my use case:
 
-- **Local Service Authentication:** Many applications lack built-in authentication. A self-hosted IdP allows me to intercept traffic and enforce authentication directly at the Gateway level before requests reach the app.
-- **Prevents Session Pollution:** External providers (like Google) tie cluster logins to global browser sessions, polluting main browsing profiles and interfering with personal services like Google Search.
-- **Incognito-Friendly:** Since I heavily use incognito windows, relying on external IdPs creates endless re-authentication loops. A self-hosted IdP keeps session lifecycles simple, predictable, and isolated.
-- **Centralized Identity:** Fully controls users, authentication policies, and app permissions in one place without depending on external cloud providers.
+- Many local exposed applications lack built-in authentication. With a self-hosted IdP and HTTPRoute, I can intercept incoming traffic and enforce authentication.
+- I heavily use incognito windows, and relying on external identity providers will break the isolation and pollute my main browser sessions.
+- Full control over users, policies, and per-application permissions without relying on features that may be limited or require additional costs from external providers.
 
 ## 💾 Backup
 
 ### Database
 
-<div style="display: flex; gap: 10px; align-items: center">
-    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/cloudflare.png" height="30"/>
-    <img src="https://cloudnative-pg.io/images/hero_image.svg" height="50"/>
-</div>
+```mermaid
+flowchart LR
+    subgraph "Cloudflare"
+        r2("Cloudflare R2")
+    end
+
+    subgraph "Kubernetes Cluster"
+        subgraph "Application"
+            pod1("Pod")
+            pod2("Pod")
+            pod3("Pod")
+        end
+        subgraph "PostgreSQL Cluster"
+
+            lb("Cluster") --> pod4("Pod")
+            lb("Cluster") --> pod5("Pod")
+            pod4 --- db1[(" ")]
+            pod4 --- db2[(" ")]
+            pod5 --- db3[(" ")]
+            pod5 --- db4[(" ")]
+        end
+        pod1 --> lb
+        pod2 --> lb
+        pod3 --> lb
+    end
+
+    lb <-->|Backup & Restore| r2
+```
 
 - I use [CloudNativePG (CNPG)](https://cloudnative-pg.io/), a Kubernetes-native operator for managing PostgreSQL clusters.
 - It includes native support for backup and restore operations via object storage.
@@ -171,13 +232,29 @@ I use [Authelia](https://www.authelia.com/) as a central authentication and auth
 
 ### Persistent Storage
 
-<div style="display: flex; gap: 10px; align-items: center">
-    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/cloudflare.png" height="30"/>
-    <img src="https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/rclone.png" height="50"/>
-</div>
+```mermaid
+flowchart LR
+    subgraph "Cloudflare"
+        r2("Cloudflare R2")
+    end
 
-- I use [rclone](https://rclone.org/) with Kubernetes CronJob to periodically back up volume to Cloudflare R2.
-- I use an `initContainer` checks the local storage on startup and syncs down from R2 before the app spins up
+    subgraph "Kubernetes Cluster"
+        subgraph "Local Path Provisioner"
+            pvc("PVC")
+        end
+        subgraph "Application"
+            pod("Pod") <--> pvc
+            pvc --> cron("rclone<br/>(CronJob)")
+            init("rclone<br/>(initContainer)") --> pvc
+        end
+    end
+
+    r2 -->|Restore| init
+    cron -->|Backup| r2
+```
+
+- I use [rclone](https://rclone.org/) with CronJob to periodically backup volume to Cloudflare R2.
+- I use an `initContainer` checks the local storage on startup and syncs down from R2 before the app spins up.
 
 ## 🔭 Monitoring
 
