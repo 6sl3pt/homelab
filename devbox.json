@@ -8,7 +8,7 @@
     "authelia@4.39.28",
     "cloudflared@2026.8.2",
     "kubernetes-helm@4.2.4",
-    "azure-cli@2.89.1"
+    "azure-cli@2.91.0"
   ],
   "shell": {
     "init_hook": ["echo 'Welcome to devbox!' > /dev/null"],
