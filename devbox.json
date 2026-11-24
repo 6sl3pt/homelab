@@ -7,7 +7,7 @@
     "fluxcd@2.9.6",
     "authelia@4.39.28",
     "cloudflared@2026.9.3",
-    "kubernetes-helm@4.2.4",
+    "kubernetes-helm@4.3.0",
     "azure-cli@2.91.0"
   ],
   "shell": {
